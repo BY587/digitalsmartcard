@@ -1,0 +1,3272 @@
+```html
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduProtocol - Smart Student SIM & Administration Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { brand: {
+                50:'#f0fdf4',100:'#dcfce7',500:'#22c55e',600:'#16a34a',700:'#15803d',800:'#166534',900:'#14532d'
+            }, slateDark:'#0f172a' } } }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="h-full bg-slate-100 text-slate-800 antialiased flex flex-col overflow-hidden">
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[60] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Custom Modal -->
+    <div id="custom-modal-backdrop" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div id="custom-modal-box" class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-95 opacity-0">
+            <div class="flex items-center space-x-3 mb-4">
+                <div id="modal-icon-wrapper" class="w-12 h-12 rounded-full flex items-center justify-center text-xl"></div>
+                <div>
+                    <h3 id="modal-title" class="text-lg font-bold text-slate-900"></h3>
+                    <p class="text-xs text-slate-500">EduProtocol Security & System</p>
+                </div>
+            </div>
+            <p id="modal-message" class="text-slate-600 text-sm mb-6"></p>
+            <div id="modal-actions" class="flex justify-end space-x-3"></div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- AUTHENTICATION & LOGIN SCREEN              -->
+    <!-- ========================================== -->
+    <div id="auth-screen" class="fixed inset-0 z-40 bg-gradient-to-br from-slate-900 via-slate-800 to-brand-900 flex items-center justify-center p-4 overflow-y-auto custom-scrollbar">
+        <div class="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl max-w-xl w-full p-8 md:p-10 border border-slate-200 my-8">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-brand-600 text-white rounded-2xl shadow-lg mb-4 text-2xl">
+                    <i class="fa-solid fa-sim-card"></i>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">EduProtocol Portal</h1>
+                <p class="text-sm text-slate-500 mt-1">Smart Student SIM & Rwandan Academic System (O & A Level)</p>
+            </div>
+
+            <!-- Auth Mode Tabs -->
+            <div class="grid grid-cols-4 gap-1.5 bg-slate-100 p-1.5 rounded-2xl mb-6 text-xs font-semibold">
+                <button onclick="switchAuthTab('staff-login')" id="atab-staff-login" class="py-2 rounded-xl transition bg-white shadow text-brand-700">Staff Login</button>
+                <button onclick="switchAuthTab('student-login')" id="atab-student-login" class="py-2 rounded-xl transition text-slate-500">Student Login</button>
+                <button onclick="switchAuthTab('staff-reg')" id="atab-staff-reg" class="py-2 rounded-xl transition text-slate-500">Staff Sign-Up</button>
+                <button onclick="switchAuthTab('student-reg')" id="atab-student-reg" class="py-2 rounded-xl transition text-slate-500">Student Sign-Up</button>
+            </div>
+
+            <!-- Quick logins -->
+            <div id="quick-logins" class="mb-5">
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Quick Test Logins (Click to Fill)</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <button onclick="fillLogin('headmaster@eduprotocol.com','admin123')" class="px-3 py-2 text-xs font-medium bg-slate-100 hover:bg-brand-50 rounded-xl border border-slate-200 transition text-left flex items-center space-x-2"><i class="fa-solid fa-user-shield text-brand-600"></i><span class="truncate">Headmaster</span></button>
+                    <button onclick="fillLogin('dos@eduprotocol.com','dos123')" class="px-3 py-2 text-xs font-medium bg-slate-100 hover:bg-brand-50 rounded-xl border border-slate-200 transition text-left flex items-center space-x-2"><i class="fa-solid fa-graduation-cap text-blue-600"></i><span class="truncate">Dir. Studies</span></button>
+                    <button onclick="fillLogin('dod@eduprotocol.com','dod123')" class="px-3 py-2 text-xs font-medium bg-slate-100 hover:bg-brand-50 rounded-xl border border-slate-200 transition text-left flex items-center space-x-2"><i class="fa-solid fa-gavel text-amber-600"></i><span class="truncate">Dir. Discipline</span></button>
+                    <button onclick="fillLogin('bursar@eduprotocol.com','bursar123')" class="px-3 py-2 text-xs font-medium bg-slate-100 hover:bg-brand-50 rounded-xl border border-slate-200 transition text-left flex items-center space-x-2"><i class="fa-solid fa-wallet text-emerald-600"></i><span class="truncate">Bursar</span></button>
+                    <button onclick="fillLogin('teacher@eduprotocol.com','teacher123')" class="px-3 py-2 text-xs font-medium bg-slate-100 hover:bg-brand-50 rounded-xl border border-slate-200 transition text-left flex items-center space-x-2"><i class="fa-solid fa-chalkboard-user text-indigo-600"></i><span class="truncate">Teacher</span></button>
+                    <button onclick="fillLogin('1200012345678','student123',true)" class="px-3 py-2 text-xs font-medium bg-slate-100 hover:bg-brand-50 rounded-xl border border-slate-200 transition text-left flex items-center space-x-2 col-span-2 sm:col-span-1"><i class="fa-solid fa-user-graduate text-rose-600"></i><span class="truncate">Student Demo</span></button>
+                </div>
+            </div>
+
+            <!-- STAFF LOGIN -->
+            <form id="form-staff-login" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase tracking-wider">Personal Email Address</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" id="login-email" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="you@yourmail.com">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase tracking-wider">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="login-password" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="••••••••">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-lg shadow-brand-600/30 transition flex items-center justify-center space-x-2">
+                    <span>Secure Staff Sign In</span><i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <!-- STUDENT LOGIN -->
+            <form id="form-student-login" onsubmit="handleStudentLogin(event)" class="space-y-4 hidden">
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-800 flex items-start space-x-2">
+                    <i class="fa-solid fa-circle-info mt-0.5"></i>
+                    <span>Students log in using their <b>SDMS Number</b> (12-digit School Data Management System number) issued by the school.</span>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase tracking-wider">SDMS Number</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-solid fa-id-card"></i></span>
+                        <input type="text" id="student-login-sdms" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="1200012345678">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase tracking-wider">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="student-login-password" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="••••••••">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-lg shadow-brand-600/30 transition flex items-center justify-center space-x-2">
+                    <span>Open My Student Portal</span><i class="fa-solid fa-user-graduate"></i>
+                </button>
+            </form>
+
+            <!-- STAFF REGISTRATION -->
+            <form id="form-staff-reg" onsubmit="handleStaffRegister(event)" class="space-y-4 hidden">
+                <div class="bg-brand-50 border border-brand-200 rounded-xl p-3 text-xs text-brand-800 flex items-start space-x-2">
+                    <i class="fa-solid fa-circle-info mt-0.5"></i>
+                    <span>Staff accounts are created using your <b>personal email</b>. Your role determines which administration modules you can access.</span>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Full Name & Title</label>
+                    <input type="text" id="reg-staff-name" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500" placeholder="e.g. Jean Habimana (Teacher)">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Personal Email</label>
+                    <input type="email" id="reg-staff-email" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500" placeholder="you@gmail.com">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Administration Role</label>
+                        <select id="reg-staff-role" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500">
+                            <option value="Headmaster">Headmaster</option>
+                            <option value="DOS">Director of Studies</option>
+                            <option value="DOD">Director of Discipline</option>
+                            <option value="Bursar">Bursar</option>
+                            <option value="Teacher">Teacher</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Password</label>
+                        <input type="password" id="reg-staff-pass" required minlength="6" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500" placeholder="Min. 6 characters">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow transition">Create Staff Account</button>
+            </form>
+
+            <!-- STUDENT REGISTRATION -->
+            <form id="form-student-reg" onsubmit="handleStudentRegister(event)" class="space-y-4 hidden">
+                <div class="bg-brand-50 border border-brand-200 rounded-xl p-3 text-xs text-brand-800 flex items-start space-x-2">
+                    <i class="fa-solid fa-circle-info mt-0.5"></i>
+                    <span>Register using your <b>SDMS Number</b>. A SIM card is automatically issued to your account.</span>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Full Name</label>
+                    <input type="text" id="reg-student-name" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500" placeholder="e.g. Sandrine Nyirahabimana">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">SDMS Number</label>
+                    <input type="text" id="reg-student-sdms" required pattern="[0-9]{12}" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-brand-500" placeholder="12-digit SDMS number">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Class</label>
+                        <select id="reg-student-class" onchange="onRegClassChange()" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500">
+                            <option>Senior 1</option><option>Senior 2</option><option>Senior 3</option>
+                            <option>Senior 4</option><option>Senior 5</option><option>Senior 6</option>
+                        </select>
+                    </div>
+                    <div id="reg-combo-wrapper" class="hidden">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">A-Level Combination</label>
+                        <select id="reg-student-combo" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500"></select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Password</label>
+                    <input type="password" id="reg-student-pass" required minlength="6" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500" placeholder="Min. 6 characters">
+                </div>
+                <button type="submit" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow transition">Create Student Account</button>
+            </form>
+
+            <div class="mt-6 text-center text-xs text-slate-400">
+                Protected by ISO/IEC 7816 Hardware Token & Role Security Matrix
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MAIN APP WRAPPER                           -->
+    <!-- ========================================== -->
+    <div id="app-wrapper" class="h-full flex flex-col hidden">
+
+        <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 lg:px-8 z-30 shrink-0">
+            <div class="flex items-center space-x-4">
+                <button onclick="toggleSidebar()" id="btn-sidebar-toggle" class="lg:hidden text-slate-600 hover:text-slate-900 p-2 rounded-lg">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-brand-600 text-white rounded-xl flex items-center justify-center shadow-md">
+                        <i class="fa-solid fa-sim-card"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-slate-900 text-base md:text-lg tracking-tight">EduProtocol</span>
+                        <span id="header-mode-badge" class="hidden sm:inline-block ml-2 px-2 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full">Secure SIM OS</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-3 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-2xl">
+                    <div id="user-avatar-badge" class="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-xs uppercase"></div>
+                    <div class="text-left hidden sm:block">
+                        <div id="user-name-badge" class="text-xs font-bold text-slate-900 leading-tight"></div>
+                        <div id="user-role-badge" class="text-[10px] text-brand-600 font-semibold uppercase tracking-wider leading-tight"></div>
+                    </div>
+                </div>
+                <button onclick="logout()" class="flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl transition">
+                    <i class="fa-solid fa-power-off"></i><span class="hidden md:inline">Logout</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 flex overflow-hidden relative">
+
+            <!-- Sidebar (ADMIN ONLY) -->
+            <aside id="sidebar" class="absolute lg:relative inset-y-0 left-0 z-20 w-64 bg-slate-900 text-slate-300 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 flex flex-col border-r border-slate-800">
+                <div class="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-800">Administration Modules</div>
+                <nav class="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto custom-scrollbar">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white"><i class="fa-solid fa-chart-pie w-5 text-center"></i><span>Dashboard</span></button>
+                    <button onclick="switchTab('students')" id="nav-students" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white" data-roles="Headmaster,DOS,DOD,Bursar,Teacher"><i class="fa-solid fa-users w-5 text-center"></i><span>Student SIM & Profiles</span></button>
+                    <button onclick="switchTab('academics')" id="nav-academics" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white" data-roles="Headmaster,DOS,Teacher"><i class="fa-solid fa-book-open w-5 text-center"></i><span>Academics & Report Cards</span></button>
+                    <button onclick="switchTab('discipline')" id="nav-discipline" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white" data-roles="Headmaster,DOD"><i class="fa-solid fa-shield-halved w-5 text-center"></i><span>Discipline & Conduct</span></button>
+                    <button onclick="switchTab('finances')" id="nav-finances" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white" data-roles="Headmaster,Bursar"><i class="fa-solid fa-wallet w-5 text-center"></i><span>Fees & Wallet Ledger</span></button>
+                    <button onclick="switchTab('attendance')" id="nav-attendance" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white" data-roles="Headmaster,DOS,Teacher"><i class="fa-solid fa-clipboard-user w-5 text-center"></i><span>Class Attendance</span></button>
+                    <button onclick="switchTab('sim-terminal')" id="nav-sim-terminal" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white" data-roles="Headmaster,DOS,DOD,Bursar"><i class="fa-solid fa-microchip w-5 text-center"></i><span>SIM ISO Terminal</span></button>
+                    <button onclick="switchTab('audit')" id="nav-audit" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition text-slate-300 hover:bg-slate-800 hover:text-white" data-roles="Headmaster"><i class="fa-solid fa-list-check w-5 text-center"></i><span>System Audit Logs</span></button>
+                </nav>
+                <div class="p-4 border-t border-slate-800 text-xs text-slate-500 flex items-center justify-between">
+                    <span>Secure v4.0</span><span class="text-brand-500 font-semibold">Active Session</span>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 flex flex-col overflow-y-auto bg-slate-100 custom-scrollbar p-4 lg:p-8">
+
+                <!-- ================= ADMIN VIEW ================= -->
+                <div id="admin-view" class="space-y-6">
+
+                <!-- DASHBOARD -->
+                <div id="tab-dashboard" class="tab-content space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900" id="welcome-title">Dashboard Overview</h2>
+                            <p class="text-sm text-slate-500">Real-time school metrics and administrative summary.</p>
+                        </div>
+                        <div id="role-badge-banner" class="inline-flex items-center space-x-2 px-3.5 py-1.5 bg-brand-50 border border-brand-200 text-brand-800 rounded-2xl text-xs font-bold"></div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-user-graduate"></i></div>
+                            <div><div class="text-xs text-slate-500 font-medium">Total Students</div><div id="stat-total-students" class="text-xl font-bold text-slate-900">0</div></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-sim-card"></i></div>
+                            <div><div class="text-xs text-slate-500 font-medium">Active SIM Chips</div><div id="stat-active-sims" class="text-xl font-bold text-slate-900">0</div></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <div><div class="text-xs text-slate-500 font-medium">Suspended Cards</div><div id="stat-suspended-cards" class="text-xl font-bold text-slate-900">0</div></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-exchange-alt"></i></div>
+                            <div><div class="text-xs text-slate-500 font-medium">Pending SIM Swaps</div><div id="stat-pending-swaps" class="text-xl font-bold text-slate-900">0</div></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                            <h3 class="text-base font-bold text-slate-900 mb-4">Role Quick Access Center</h3>
+                            <div id="role-quick-actions" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col">
+                            <h3 class="text-base font-bold text-slate-900 mb-4">System Security Status</h3>
+                            <div class="space-y-4 flex-1">
+                                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl"><span class="text-xs font-medium text-slate-600">ISO/IEC 7816 Engine</span><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full">ONLINE</span></div>
+                                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl"><span class="text-xs font-medium text-slate-600">RBAC Security Guard</span><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full">ENFORCED</span></div>
+                                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl"><span class="text-xs font-medium text-slate-600">Encrypted Ledger</span><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full">SECURE</span></div>
+                                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl"><span class="text-xs font-medium text-slate-600">Student Portal Isolation</span><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full">ENFORCED</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STUDENTS -->
+                <div id="tab-students" class="tab-content space-y-6 hidden">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900">Student Profiles & SIM Management</h2>
+                            <p class="text-sm text-slate-500">Registry, SDMS numbers, ICCID mapping, SIM swaps and card statuses.</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="downloadStudentRegistry()" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl shadow transition flex items-center space-x-2"><i class="fa-solid fa-download"></i><span>Download Registry</span></button>
+                            <button onclick="openAddStudentModal()" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl shadow transition flex items-center space-x-2"><i class="fa-solid fa-user-plus"></i><span>Register Student</span></button>
+                        </div>
+                    </div>
+
+                    <!-- Pending SIM swap requests -->
+                    <div id="swap-requests-panel" class="bg-white rounded-2xl border border-amber-300 shadow-sm p-5 hidden">
+                        <h3 class="text-base font-bold text-slate-900 mb-3 flex items-center space-x-2"><i class="fa-solid fa-exchange-alt text-amber-600"></i><span>Pending SIM Swap Requests (Reported by Students)</span></h3>
+                        <div id="swap-requests-list" class="space-y-2"></div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row gap-3 items-center justify-between">
+                            <div class="relative w-full sm:w-72">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-solid fa-search"></i></span>
+                                <input type="text" id="student-search" oninput="renderStudentsTable()" placeholder="Search name, SDMS or ICCID..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div class="text-xs text-slate-500">Showing all registered student profiles</div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                                        <th class="p-4">Student Info</th>
+                                        <th class="p-4">Class / Stream</th>
+                                        <th class="p-4">SIM ICCID / Phone</th>
+                                        <th class="p-4">Wallet</th>
+                                        <th class="p-4">Conduct</th>
+                                        <th class="p-4">Card Status</th>
+                                        <th class="p-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="students-table-body" class="divide-y divide-slate-200 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACADEMICS -->
+                <div id="tab-academics" class="tab-content space-y-6 hidden">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900">Academics, Positions & Report Cards</h2>
+                            <p class="text-sm text-slate-500">Rwandan curriculum — O-Level & A-Level. Positions and divisions computed automatically.</p>
+                        </div>
+                        <button onclick="downloadAllReportCards()" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl shadow transition flex items-center space-x-2"><i class="fa-solid fa-download"></i><span>Download All Report Cards</span></button>
+                    </div>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6">
+                        <h3 class="text-base font-bold text-slate-900 mb-4">Class Performance & Ranking Matrix</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                                        <th class="p-4">Pos.</th>
+                                        <th class="p-4">Student Name</th>
+                                        <th class="p-4">Class</th>
+                                        <th class="p-4">Stream / Combo</th>
+                                        <th class="p-4">Average</th>
+                                        <th class="p-4">Division</th>
+                                        <th class="p-4">Conduct</th>
+                                        <th class="p-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="academics-table-body" class="divide-y divide-slate-200 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DISCIPLINE -->
+                <div id="tab-discipline" class="tab-content space-y-6 hidden">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900">Discipline, Conduct & Gate Pass Logs</h2>
+                            <p class="text-sm text-slate-500">Behavioral logs, conduct deductions and SIM card suspensions/locks.</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="downloadDisciplineCSV()" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl shadow transition flex items-center space-x-2"><i class="fa-solid fa-download"></i><span>Download Logs</span></button>
+                            <button onclick="openDisciplineModal()" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl shadow transition flex items-center space-x-2"><i class="fa-solid fa-triangle-exclamation"></i><span>Log Infraction</span></button>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6">
+                        <h3 class="text-base font-bold text-slate-900 mb-4">Disciplinary, Conduct & Gate Activity Log</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                                        <th class="p-4">Timestamp</th>
+                                        <th class="p-4">Student</th>
+                                        <th class="p-4">Infraction / Gate Event</th>
+                                        <th class="p-4">Action Taken</th>
+                                        <th class="p-4">Conduct Impact</th>
+                                        <th class="p-4">Logged By</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="discipline-table-body" class="divide-y divide-slate-200 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FINANCES -->
+                <div id="tab-finances" class="tab-content space-y-6 hidden">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900">Fees Collection & Wallet Ledger</h2>
+                            <p class="text-sm text-slate-500">Record mobile money fee collections and SIM wallet top-ups.</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="downloadFinanceCSV()" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl shadow transition flex items-center space-x-2"><i class="fa-solid fa-download"></i><span>Download Ledger</span></button>
+                            <button onclick="openFeePaymentModal()" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl shadow transition flex items-center space-x-2"><i class="fa-solid fa-cash-register"></i><span>Record Fee Payment</span></button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"><div class="text-xs text-slate-500 font-medium">Total Fees Collected (Term)</div><div id="fin-total-collected" class="text-2xl font-bold text-slate-900 mt-1">$0.00</div></div>
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"><div class="text-xs text-slate-500 font-medium">Outstanding Balances</div><div id="fin-total-outstanding" class="text-2xl font-bold text-rose-600 mt-1">$0.00</div></div>
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"><div class="text-xs text-slate-500 font-medium">SIM Wallet Top-Ups Today</div><div id="fin-wallet-topups" class="text-2xl font-bold text-brand-600 mt-1">$0.00</div></div>
+                    </div>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6">
+                        <h3 class="text-base font-bold text-slate-900 mb-4">Financial Transaction Ledger</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                                        <th class="p-4">Txn ID</th><th class="p-4">Student</th><th class="p-4">Type</th><th class="p-4">Amount</th><th class="p-4">Method</th><th class="p-4">Bursar</th><th class="p-4">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="finance-table-body" class="divide-y divide-slate-200 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ATTENDANCE -->
+                <div id="tab-attendance" class="tab-content space-y-6 hidden">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900">Class Attendance Logging</h2>
+                            <p class="text-sm text-slate-500">Mark daily classroom attendance via student SIM tap records.</p>
+                        </div>
+                        <button onclick="saveAttendance()" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl shadow transition flex items-center space-x-2"><i class="fa-solid fa-floppy-disk"></i><span>Save Attendance Register</span></button>
+                    </div>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-base font-bold text-slate-900">Today's Class Roll Call</h3>
+                            <span id="attendance-date" class="text-xs font-semibold text-slate-500"></span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                                        <th class="p-4">Student Name</th><th class="p-4">Class</th><th class="p-4">SIM ICCID</th><th class="p-4 text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendance-table-body" class="divide-y divide-slate-200 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIM TERMINAL -->
+                <div id="tab-sim-terminal" class="tab-content space-y-6 hidden">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900">ISO/IEC 7816 SIM Card & Phone Terminal</h2>
+                        <p class="text-sm text-slate-500">Simulate hardware APDU commands, card insertion, and NFC gate tapping.</p>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col">
+                            <h3 class="text-base font-bold text-slate-900 mb-4">Hardware SIM Terminal</h3>
+                            <div class="bg-slate-900 text-slate-200 p-6 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden mb-6 flex-1 min-h-[220px]">
+                                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#22c55e_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                                <div class="w-48 h-32 bg-gradient-to-tr from-slate-800 to-slate-700 rounded-xl border border-slate-600 shadow-2xl p-4 flex flex-col justify-between">
+                                    <div class="flex justify-between items-center"><span class="text-[10px] font-mono text-emerald-400">ISO/IEC 7816</span><i class="fa-solid fa-sim-card text-emerald-500"></i></div>
+                                    <div class="font-mono text-xs text-slate-300 tracking-widest" id="terminal-iccid-display">892560...</div>
+                                    <div class="flex justify-between items-end"><span class="text-[9px] text-slate-400" id="terminal-student-display">Not Inserted</span><span id="terminal-status-dot" class="w-2.5 h-2.5 rounded-full bg-rose-500"></span></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="simulateCardInsert()" class="py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-sm transition shadow">Insert / Tap SIM</button>
+                                <button onclick="simulateCardEject()" class="py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-xl text-sm transition">Eject SIM</button>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-sm p-6 flex flex-col text-slate-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-base font-bold text-white">APDU Command Log</h3>
+                                <button onclick="clearApduLog()" class="text-xs text-slate-400 hover:text-white">Clear Log</button>
+                            </div>
+                            <div id="apdu-log-box" class="bg-slate-950 font-mono text-xs p-4 rounded-xl flex-1 overflow-y-auto max-h-[260px] space-y-2 custom-scrollbar border border-slate-800">
+                                <div class="text-slate-500">[System] ISO/IEC 7816 Terminal Initialized. Ready for APDU commands.</div>
+                            </div>
+                            <div class="mt-4 flex gap-2">
+                                <input type="text" id="apdu-input" placeholder="Enter APDU (e.g. A0 A4 00 00)..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-xs font-mono text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                <button onclick="sendApduCommand()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-xl transition">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AUDIT -->
+                <div id="tab-audit" class="tab-content space-y-6 hidden">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900">System Activity & Audit Trail Logs</h2>
+                            <p class="text-sm text-slate-500">Strict chronological audit records of all actions performed across roles.</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="downloadFullHistory()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow transition flex items-center space-x-2"><i class="fa-solid fa-file-arrow-down"></i><span>Download Full History</span></button>
+                            <button onclick="downloadAuditCSV()" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl shadow transition flex items-center space-x-2"><i class="fa-solid fa-download"></i><span>Export Audit CSV</span></button>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6">
+                        <h3 class="text-base font-bold text-slate-900 mb-4">Immutable Security Audit Trail</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                                        <th class="p-4">Timestamp</th><th class="p-4">Administrator</th><th class="p-4">Role</th><th class="p-4">Action</th><th class="p-4">Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="audit-table-body" class="divide-y divide-slate-200 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                </div><!-- /admin-view -->
+
+                <!-- ================= STUDENT PORTAL (ISOLATED) ================= -->
+                <div id="student-portal" class="space-y-6 hidden">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900">My Student Portal</h2>
+                            <p class="text-sm text-slate-500">Your personal academic, SIM wallet and conduct view.</p>
+                        </div>
+                        <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 bg-brand-50 border border-brand-200 text-brand-800 rounded-2xl text-xs font-bold">
+                            <i class="fa-solid fa-user-graduate"></i><span>Student View — Administration Hidden</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Profile + SIM -->
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 lg:col-span-1">
+                            <h3 class="text-base font-bold text-slate-900 mb-4">My Profile & SIM Card</h3>
+                            <div id="portal-profile" class="space-y-3 mb-5"></div>
+                            <div class="bg-slate-900 text-slate-200 p-4 rounded-2xl relative overflow-hidden">
+                                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#22c55e_1px,transparent_1px)] [background-size:14px_14px]"></div>
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="text-[10px] font-mono text-emerald-400">ISO/IEC 7816</span>
+                                    <i class="fa-solid fa-sim-card text-emerald-500"></i>
+                                </div>
+                                <div id="portal-iccid" class="font-mono text-xs text-slate-200 tracking-widest mb-2"></div>
+                                <div class="flex justify-between items-center">
+                                    <span id="portal-card-status" class="text-[10px] font-semibold"></span>
+                                    <span id="portal-card-dot" class="w-2.5 h-2.5 rounded-full"></span>
+                                </div>
+                            </div>
+                            <button onclick="studentReportSimProblem()" class="mt-4 w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-xl transition flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-exchange-alt"></i><span>Report Lost / Damaged SIM (Request Swap)</span>
+                            </button>
+                        </div>
+
+                        <!-- Wallet + Conduct -->
+                        <div class="space-y-6 lg:col-span-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                                    <div class="flex items-center space-x-3 mb-2">
+                                        <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-wallet"></i></div>
+                                        <div class="text-xs text-slate-500 font-medium">SIM Wallet Balance</div>
+                                    </div>
+                                    <div id="portal-balance" class="text-2xl font-bold text-slate-900">$0.00</div>
+                                </div>
+                                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                                    <div class="flex items-center space-x-3 mb-2">
+                                        <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-star"></i></div>
+                                        <div class="text-xs text-slate-500 font-medium">My Conduct Score</div>
+                                    </div>
+                                    <div id="portal-conduct" class="text-2xl font-bold text-slate-900">100 / 100</div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2 mt-2"><div id="portal-conduct-bar" class="bg-brand-500 h-2 rounded-full" style="width:100%"></div></div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-base font-bold text-slate-900">My Subjects & Marks</h3>
+                                    <button onclick="viewMyReportCard()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition flex items-center space-x-2"><i class="fa-solid fa-file-lines"></i><span>View / Download Report Card</span></button>
+                                </div>
+                                <div id="portal-grades" class="space-y-2 max-h-72 overflow-y-auto custom-scrollbar"></div>
+                                <div id="portal-summary" class="mt-4 pt-4 border-t border-slate-200 flex flex-wrap gap-3"></div>
+                            </div>
+
+                            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                                <h3 class="text-base font-bold text-slate-900 mb-4">My Discipline Record</h3>
+                                <div id="portal-discipline" class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODALS                                     -->
+    <!-- ========================================== -->
+
+    <!-- Add Student Modal -->
+    <div id="modal-add-student" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 md:p-8 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-slate-900">Register New Student & SIM</h3>
+                <button onclick="closeModal('modal-add-student')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleCreateStudent(event)" class="space-y-4">
+                <div><label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Full Name</label><input type="text" id="new-student-name" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">SDMS Number</label>
+                        <input type="text" id="new-student-sdms" required pattern="[0-9]{12}" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-brand-500" placeholder="12 digits">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">SIM Phone Number</label>
+                        <input type="text" id="new-student-phone" required value="+250 78" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Class</label>
+                        <select id="new-student-class" onchange="onNewStudentClassChange()" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500">
+                            <option>Senior 1</option><option>Senior 2</option><option>Senior 3</option>
+                            <option>Senior 4</option><option>Senior 5</option><option>Senior 6</option>
+                        </select>
+                    </div>
+                    <div id="new-combo-wrapper" class="hidden">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Combination</label>
+                        <select id="new-student-combo" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500"></select>
+                    </div>
+                </div>
+                <div><label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">SIM Card ICCID</label><input type="text" id="new-student-iccid" required value="89256032000" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-brand-500"></div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeModal('modal-add-student')" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl transition shadow">Save Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Fee Modal -->
+    <div id="modal-fee" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 md:p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-slate-900">Record Fee Payment / SIM Top-Up</h3>
+                <button onclick="closeModal('modal-fee')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleFeePayment(event)" class="space-y-4">
+                <div><label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Select Student</label><select id="fee-student-select" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500"></select></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Amount ($)</label><input type="number" id="fee-amount" required min="1" value="150" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500"></div>
+                    <div><label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Payment Method</label><select id="fee-method" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500"><option value="Mobile Money">Mobile Money (SIM)</option><option value="Bank Transfer">Bank Transfer</option><option value="Cash">Cash Ledger</option></select></div>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeModal('modal-fee')" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl transition shadow">Process & Receipt</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Discipline / Conduct Modal -->
+    <div id="modal-discipline" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 md:p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-slate-900">Log Infraction & Deduct Conduct</h3>
+                <button onclick="closeModal('modal-discipline')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleDisciplineLog(event)" class="space-y-4">
+                <div><label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Select Student</label><select id="disc-student-select" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500"></select></div>
+                <div><label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Infraction Type / Reason</label><input type="text" id="disc-reason" required placeholder="e.g. Late coming, Unauthorized exit" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500"></div>
+                <div><label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Disciplinary Action</label><select id="disc-action" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500"><option value="Warning">Official Warning</option><option value="Gate Pass Denied">Gate Pass Denied</option><option value="Conduct Deduction Only">Conduct Deduction Only</option><option value="SIM Card Suspended">Suspend SIM Card Access</option></select></div>
+                <div><label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Conduct Points to Deduct (out of 100)</label><input type="number" id="disc-points" min="0" max="100" value="5" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500"></div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeModal('modal-discipline')" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-xl transition shadow">Execute Action</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Grades Edit Modal -->
+    <div id="modal-grades" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 md:p-8 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-slate-900">Enter / Edit Marks</h3>
+                <button onclick="closeModal('modal-grades')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="grades-edit-info" class="mb-4 p-3 bg-slate-50 rounded-xl text-xs text-slate-600"></div>
+            <form onsubmit="handleGradesEdit(event)" class="space-y-3">
+                <div id="grades-edit-fields" class="space-y-3 max-h-72 overflow-y-auto custom-scrollbar pr-1"></div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeModal('modal-grades')" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl transition shadow">Save All Marks</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Swap SIM Modal -->
+    <div id="modal-swap" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 md:p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-slate-900">Swap / Replace SIM Card</h3>
+                <button onclick="closeModal('modal-swap')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="swap-info" class="mb-4 p-3 bg-slate-50 rounded-xl text-xs text-slate-600"></div>
+            <form onsubmit="handleSwap(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1 uppercase">Reason for Swap</label>
+                    <select id="swap-reason" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500">
+                        <option value="Lost Card">Lost Card</option>
+                        <option value="Damaged / Faulty Card">Damaged / Faulty Card</option>
+                        <option value="Card Read Error">Card Read Error (ISO Fault)</option>
+                    </select>
+                </div>
+                <div class="bg-brand-50 border border-brand-200 rounded-xl p-3 text-xs text-brand-800">
+                    <i class="fa-solid fa-circle-info mr-1"></i>A <b>new ICCID</b> will be issued and the old chip permanently revoked in the ISO/IEC 7816 registry.
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeModal('modal-swap')" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl transition shadow">Issue New SIM</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Card Modal -->
+    <div id="modal-report" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 md:p-8 max-h-[92vh] overflow-y-auto custom-scrollbar">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-slate-900">Official Report Card</h3>
+                <button onclick="closeModal('modal-report')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="report-card-content"></div>
+            <div class="flex justify-end space-x-3 mt-6">
+                <button type="button" onclick="closeModal('modal-report')" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition">Close</button>
+                <button onclick="printCurrentReportCard()" class="px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl transition flex items-center space-x-2"><i class="fa-solid fa-print"></i><span>Print</span></button>
+                <button onclick="downloadCurrentReportCard()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl transition flex items-center space-x-2"><i class="fa-solid fa-download"></i><span>Download CSV</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- APPLICATION JAVASCRIPT                     -->
+    <!-- ========================================== -->
+    <script>
+        /* ================= RWANDAN CURRICULUM DATA ================= */
+        const O_LEVEL_SUBJECTS = [
+            'Mathematics','English','Kinyarwanda','Biology','Chemistry','Physics',
+            'Geography','History & Citizenship','Computer Science','Entrepreneurship',
+            'Physical Education (PHE)','Kiswahili'
+        ];
+        const A_LEVEL_COMBOS = {
+            'PCB':  ['Physics','Chemistry','Biology'],
+            'MPC':  ['Mathematics','Physics','Chemistry'],
+            'MCB':  ['Mathematics','Chemistry','Biology'],
+            'MEG':  ['Mathematics','Economics','Geography'],
+            'HEG':  ['History','Economics','Geography'],
+            'HLG':  ['History','Literature in English','Geography'],
+            'HLE':  ['History','Literature in English','Economics'],
+            'EGM':  ['Economics','Geography','Mathematics']
+        };
+        const SUBSIDIARY = ['General Paper'];
+        const O_LEVEL_CLASSES = ['Senior 1','Senior 2','Senior 3'];
+        const A_LEVEL_CLASSES = ['Senior 4','Senior 5','Senior 6'];
+
+        /* ================= STATE & PERSISTENCE ================= */
+        function seedState() {
+            const mk = (id, name, cls, combo, base) => {
+                const subs = getSubjectsFor(cls, combo);
+                const grades = {};
+                subs.forEach((s, i) => grades[s] = Math.min(99, base + ((id * 7 + i * 13) % 35)));
+                return { id, sdms: '1200' + String(10000000 + id * 111111).slice(0,8), name, class: cls, combination: combo,
+                    phone: '+250 78' + (10000000 + id * 1234567).toString().slice(0,8),
+                    iccid: '8925603200' + String(1000000 + id * 111111),
+                    balance: [240,450,10,320,120][id-1] || 100, status: id === 3 ? 'Suspended' : 'Active',
+                    conduct: id === 3 ? 72 : 95, grades, simSwapHistory: [] };
+            };
+            return {
+                users: [
+                    { id:'u1', type:'staff', email:'headmaster@gmail.com', pass:'admin123', name:'Dr. Paul Kagame', role:'Headmaster', roleBadge:'Head Teacher' },
+                    { id:'u2', type:'staff', email:'dos@eduprotocol.com', pass:'dos123', name:'Alice Mukamana', role:'DOS', roleBadge:'Dir. of Studies' },
+                    { id:'u3', type:'staff', email:'dod@eduprotocol.com', pass:'dod123', name:'Capt. Jean Bosco', role:'DOD', roleBadge:'Dir. of Discipline' },
+                    { id:'u4', type:'staff', email:'bursar@eduprotocol.com', pass:'bursar123', name:'Clémentine Uwase', role:'Bursar', roleBadge:'School Bursar' },
+                    { id:'u5', type:'staff', email:'teacher@eduprotocol.com', pass:'teacher123', name:'Emmanuel Ndayisenga', role:'Teacher', roleBadge:'Class Teacher' },
+                    { id:'u6', type:'student', sdms:'1200012345678', pass:'student123', name:'David Mugisha', role:'Student', roleBadge:'Student', studentId:1 }
+                ],
+                students: [
+                    mk(1,'David Mugisha','Senior 4','MPC',78),
+                    mk(2,'Diane Uwase','Senior 5','MPC',88),
+                    mk(3,'Eric Niyonzima','Senior 4','HEG',56),
+                    mk(4,'Aline Ingabire','Senior 6','PCB',90),
+                    mk(5,'Patrick Habimana','Senior 4','MEG',68)
+                ],
+                finances: [
+                    { txId:'TXN-8821', student:'David Mugisha', type:'Fee Deposit', amount:150, method:'Mobile Money', bursar:'Clémentine Uwase', date:'2026-10-18 09:30' },
+                    { txId:'TXN-8822', student:'Diane Uwase', type:'Wallet Top-up', amount:50, method:'Mobile Money', bursar:'Clémentine Uwase', date:'2026-10-18 10:15' },
+                    { txId:'TXN-8823', student:'Aline Ingabire', type:'Fee Deposit', amount:200, method:'Bank Transfer', bursar:'Clémentine Uwase', date:'2026-10-19 14:00' }
+                ],
+                discipline: [
+                    { time:'2026-10-19 08:15', student:'Eric Niyonzima', infraction:'Late coming to morning assembly', action:'Official Warning', points:3, admin:'Capt. Jean Bosco' },
+                    { time:'2026-10-19 16:45', student:'Eric Niyonzima', infraction:'Unauthorized perimeter exit', action:'SIM Card Suspended', points:15, admin:'Capt. Jean Bosco' }
+                ],
+                attendance: {},
+                auditLogs: [
+                    { time:'2026-10-18 08:00', admin:'System', role:'Headmaster', action:'System Boot', details:'ISO/IEC 7816 SIM Engine initialized successfully.' }
+                ],
+                swapRequests: []
+            };
+        }
+
+        let appState = { currentUser: null };
+        function loadState() {
+            try {
+                const raw = localStorage.getItem('edu_state_v4');
+                if (raw) { appState = JSON.parse(raw); appState.currentUser = null; return; }
+            } catch(e) {}
+            appState = seedState();
+            saveState();
+        }
+        function saveState() {
+            const toSave = { ...appState }; delete toSave.currentUser;
+            localStorage.setItem('edu_state_v4', JSON.stringify(toSave));
+        }
+
+        window.onload = function() {
+            loadState();
+            const savedUser = localStorage.getItem('edu_current_user');
+            if (savedUser) {
+                try {
+                    appState.currentUser = JSON.parse(savedUser);
+                    // verify still exists
+                    const still = appState.users.find(u => u.id === appState.currentUser.id);
+                    if (still) { appState.currentUser = still; startAppSession(); }
+                    else localStorage.removeItem('edu_current_user');
+                } catch(e) { localStorage.removeItem('edu_current_user'); }
+            }
+        };
+
+        /* ================= CURRICULUM HELPERS ================= */
+        function getSubjectsFor(cls, combo) {
+            if (O_LEVEL_CLASSES.includes(cls)) return [...O_LEVEL_SUBJECTS];
+            const principal = A_LEVEL_COMBOS[combo] || ['Mathematics','Physics','Chemistry'];
+            return [...principal, ...SUBSIDIARY];
+        }
+        function isALevel(cls) { return A_LEVEL_CLASSES.includes(cls); }
+        function gradeLetter(m) {
+            if (m === null || m === undefined || m === '') return '—';
+            if (m >= 80) return 'A';
+            if (m >= 70) return 'B';
+            if (m >= 60) return 'C';
+            if (m >= 50) return 'D';
+            if (m >= 40) return 'E';
+            return 'F';
+        }
+        function getDivision(avg) {
+            if (avg >= 80) return 'Division I (Excellent)';
+            if (avg >= 70) return 'Division II (Very Good)';
+            if (avg >= 60) return 'Division III (Good)';
+            if (avg >= 50) return 'Division IV (Satisfactory)';
+            return 'Fail';
+        }
+        function studentAverage(s) {
+            const subs = getSubjectsFor(s.class, s.combination);
+            const vals = subs.map(x => s.grades[x]).filter(v => v !== null && v !== undefined && v !== '');
+            if (!vals.length) return 0;
+            return Math.round(vals.reduce((a,b) => a + Number(b), 0) / vals.length);
+        }
+        function classRanking() {
+            const map = {};
+            appState.students.forEach(s => {
+                (map[s.class] = map[s.class] || []).push(s);
+            });
+            Object.keys(map).forEach(c => {
+                map[c].sort((a,b) => studentAverage(b) - studentAverage(a));
+                map[c].forEach((s, i) => s._position = i + 1);
+            });
+            return map;
+        }
+        function positionOf(s) { classRanking(); return s._position || '—'; }
+        function classSizeOf(s) { return appState.students.filter(x => x.class === s.class).length; }
+        function nowStr() { return new Date().toISOString().slice(0,16).replace('T',' '); }
+        function genIccid() { return '8925603200' + Math.floor(1000000 + Math.random() * 8999999); }
+
+        /* ================= AUTH ================= */
+        function switchAuthTab(mode) {
+            ['staff-login','student-login','staff-reg','student-reg'].forEach(m => {
+                document.getElementById('form-' + m).classList.add('hidden');
+                document.getElementById('atab-' + m).classList.remove('bg-white','shadow','text-brand-700');
+                document.getElementById('atab-' + m).classList.add('text-slate-500');
+            });
+            document.getElementById('form-' + mode).classList.remove('hidden');
+            const at = document.getElementById('atab-' + mode);
+            at.classList.add('bg-white','shadow','text-brand-700');
+            at.classList.remove('text-slate-500');
+            document.getElementById('quick-logins').classList.toggle('hidden', mode !== 'staff-login' && mode !== 'student-login');
+        }
+
+        function fillLogin(id, pass, isStudent=false) {
+            if (isStudent) {
+                switchAuthTab('student-login');
+                document.getElementById('student-login-sdms').value = id;
+                document.getElementById('student-login-password').value = pass;
+            } else {
+                switchAuthTab('staff-login');
+                document.getElementById('login-email').value = id;
+                document.getElementById('login-password').value = pass;
+            }
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const pass = document.getElementById('login-password').value.trim();
+            const found = appState.users.find(u => u.type === 'staff' && u.email === email && u.pass === pass);
+            if (!found) { showToast('Invalid credentials or unauthorized email.', 'error'); return; }
+            appState.currentUser = found;
+            localStorage.setItem('edu_current_user', JSON.stringify(found));
+            logAudit('User Login', `Authenticated as ${found.name} (${found.role})`);
+            startAppSession();
+            showToast(`Welcome back, ${found.name}!`, 'success');
+        }
+
+        function handleStudentLogin(event) {
+            event.preventDefault();
+            const sdms = document.getElementById('student-login-sdms').value.trim();
+            const pass = document.getElementById('student-login-password').value.trim();
+            const found = appState.users.find(u => u.type === 'student' && u.sdms === sdms && u.pass === pass);
+            if (!found) { showToast('Invalid SDMS number or password.', 'error'); return; }
+            appState.currentUser = found;
+            localStorage.setItem('edu_current_user', JSON.stringify(found));
+            logAudit('Student Login', `Student ${found.name} (${sdms}) opened the student portal`);
+            startAppSession();
+            showToast(`Welcome to your portal, ${found.name}!`, 'success');
+        }
+
+        function handleStaffRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById('reg-staff-name').value.trim();
+            const email = document.getElementById('reg-staff-email').value.trim().toLowerCase();
+            const role = document.getElementById('reg-staff-role').value;
+            const pass = document.getElementById('reg-staff-pass').value;
+            if (appState.users.some(u => u.email === email)) {
+                showToast('An account with this email already exists.', 'error'); return;
+            }
+            const badges = { Headmaster:'Head Teacher', DOS:'Dir. of Studies', DOD:'Dir. of Discipline', Bursar:'School Bursar', Teacher:'Class Teacher' };
+            const user = { id:'u' + Date.now(), type:'staff', email, pass, name, role, roleBadge:badges[role] };
+            appState.users.push(user);
+            logAudit('Staff Account Created', `${name} registered as ${role} (personal email: ${email})`);
+            saveState();
+            showToast('Staff account created! You can now sign in.', 'success');
+            switchAuthTab('staff-login');
+            document.getElementById('login-email').value = email;
+            event.target.reset();
+        }
+
+        function handleStudentRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById('reg-student-name').value.trim();
+            const sdms = document.getElementById('reg-student-sdms').value.trim();
+            const cls = document.getElementById('reg-student-class').value;
+            const combo = isALevel(cls) ? document.getElementById('reg-student-combo').value : null;
+            const pass = document.getElementById('reg-student-pass').value;
+            if (appState.users.some(u => u.sdms === sdms)) {
+                showToast('This SDMS number is already registered.', 'error'); return;
+            }
+            const iccid = genIccid();
+            const grades = {};
+            getSubjectsFor(cls, combo).forEach(s => grades[s] = '');
+            const student = {
+                id: Math.max(0, ...appState.students.map(s => s.id)) + 1,
+                sdms, name, class: cls, combination: combo,
+                phone: '+250 78' + Math.floor(10000000 + Math.random()*89999999),
+                iccid, balance: 0, status: 'Active', conduct: 100, grades, simSwapHistory: []
+            };
+            appState.students.push(student);
+            const user = { id:'u' + Date.now(), type:'student', sdms, pass, name, role:'Student', roleBadge:'Student', studentId: student.id };
+            appState.users.push(user);
+            logAudit('Student Account Created', `${name} registered with SDMS ${sdms} (${cls}${combo ? ' ' + combo : ''}), SIM ICCID ${iccid} issued`);
+            saveState();
+            showToast('Student account created with SIM card issued! Sign in now.', 'success');
+            switchAuthTab('student-login');
+            document.getElementById('student-login-sdms').value = sdms;
+            event.target.reset();
+        }
+
+        function onRegClassChange() {
+            const cls = document.getElementById('reg-student-class').value;
+            const w = document.getElementById('reg-combo-wrapper');
+            if (isALevel(cls)) {
+                w.classList.remove('hidden');
+                const sel = document.getElementById('reg-student-combo');
+                sel.innerHTML = Object.keys(A_LEVEL_COMBOS).map(c => `<option value="${c}">${c}</option>`).join('');
+            } else w.classList.add('hidden');
+        }
+        function onNewStudentClassChange() {
+            const cls = document.getElementById('new-student-class').value;
+            const w = document.getElementById('new-combo-wrapper');
+            if (isALevel(cls)) {
+                w.classList.remove('hidden');
+                const sel = document.getElementById('new-student-combo');
+                sel.innerHTML = Object.keys(A_LEVEL_COMBOS).map(c => `<option value="${c}">${c}</option>`).join('');
+            } else w.classList.add('hidden');
+        }
+
+        /* ================= SESSION ================= */
+        function startAppSession() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-wrapper').classList.remove('hidden');
+            const user = appState.currentUser;
+            document.getElementById('user-avatar-badge').innerText = user.name.charAt(0);
+            document.getElementById('user-name-badge').innerText = user.name;
+            document.getElementById('user-role-badge').innerText = user.roleBadge;
+
+            const isStudent = user.role === 'Student';
+            document.getElementById('sidebar').classList.toggle('hidden', isStudent);
+            document.getElementById('btn-sidebar-toggle').classList.toggle('hidden', isStudent);
+            document.getElementById('admin-view').classList.toggle('hidden', isStudent);
+            document.getElementById('student-portal').classList.toggle('hidden', !isStudent);
+            document.getElementById('header-mode-badge').innerText = isStudent ? 'Student Portal' : 'Secure SIM OS';
+
+            if (isStudent) { renderStudentPortal(); }
+            else { applyRoleGuards(); switchTab('dashboard'); }
+        }
+
+        function logout() {
+            logAudit('User Logout', `Logged out from role ${appState.currentUser.role}`);
+            localStorage.removeItem('edu_current_user');
+            appState.currentUser = null;
+            document.getElementById('app-wrapper').classList.add('hidden');
+            document.getElementById('auth-screen').classList.remove('hidden');
+            showToast('Successfully logged out.', 'info');
+        }
+
+        function applyRoleGuards() {
+            const role = appState.currentUser.role;
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const allowed = item.getAttribute('data-roles');
+                if (allowed) {
+                    const rolesList = allowed.split(',');
+                    if (!rolesList.includes(role)) {
+                        item.classList.add('opacity-40','pointer-events-none');
+                        item.title = 'Access Restricted for your Role';
+                    } else {
+                        item.classList.remove('opacity-40','pointer-events-none');
+                        item.title = '';
+                    }
+                }
+            });
+        }
+
+        function switchTab(tabId) {
+            const tabEl = document.getElementById(`nav-${tabId}`);
+            if (tabEl && tabEl.classList.contains('pointer-events-none')) {
+                showModal('Access Denied', 'Your current role does not have security authorization to access this module.', 'error');
+                return;
+            }
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('bg-brand-600','text-white'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            if (tabEl) tabEl.classList.add('bg-brand-600','text-white');
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            if (tabId === 'dashboard') renderDashboard();
+            if (tabId === 'students') renderStudentsTable();
+            if (tabId === 'academics') renderAcademicsTable();
+            if (tabId === 'discipline') renderDisciplineTable();
+            if (tabId === 'finances') renderFinancesTable();
+            if (tabId === 'attendance') renderAttendanceTable();
+            if (tabId === 'audit') renderAuditTable();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        }
+
+        /* ================= DASHBOARD ================= */
+        function renderDashboard() {
+            const user = appState.currentUser;
+            document.getElementById('welcome-title').innerText = `Welcome, ${user.name}`;
+            document.getElementById('role-badge-banner').innerHTML = `<i class="fa-solid fa-shield-halved"></i><span>Active Role: ${user.roleBadge}</span>`;
+            document.getElementById('stat-total-students').innerText = appState.students.length;
+            document.getElementById('stat-active-sims').innerText = appState.students.filter(s => s.status === 'Active').length;
+            document.getElementById('stat-suspended-cards').innerText = appState.students.filter(s => s.status === 'Suspended').length;
+            document.getElementById('stat-pending-swaps').innerText = appState.swapRequests.length;
+
+            const quickActionsBox = document.getElementById('role-quick-actions');
+            let actions = {
+                Headmaster: [
+                    { title:'Review Audit Logs', icon:'fa-list-check', tab:'audit', color:'bg-indigo-50 text-indigo-600' },
+                    { title:'Financial Ledgers', icon:'fa-wallet', tab:'finances', color:'bg-emerald-50 text-emerald-600' },
+                    { title:'Student Management', icon:'fa-users', tab:'students', color:'bg-blue-50 text-blue-600' },
+                    { title:'ISO SIM Terminal', icon:'fa-microchip', tab:'sim-terminal', color:'bg-amber-50 text-amber-600' }
+                ],
+                DOS: [
+                    { title:'Enter Exam Grades', icon:'fa-book-open', tab:'academics', color:'bg-blue-50 text-blue-600' },
+                    { title:'Class Attendance', icon:'fa-clipboard-user', tab:'attendance', color:'bg-emerald-50 text-emerald-600' },
+                    { title:'Student Records', icon:'fa-users', tab:'students', color:'bg-indigo-50 text-indigo-600' },
+                    { title:'SIM Terminal', icon:'fa-microchip', tab:'sim-terminal', color:'bg-amber-50 text-amber-600' }
+                ],
+                DOD: [
+                    { title:'Log Infraction / Conduct', icon:'fa-shield-halved', tab:'discipline', color:'bg-amber-50 text-amber-600' },
+                    { title:'Student SIM Directory', icon:'fa-users', tab:'students', color:'bg-blue-50 text-blue-600' },
+                    { title:'ISO SIM Terminal', icon:'fa-microchip', tab:'sim-terminal', color:'bg-emerald-50 text-emerald-600' }
+                ],
+                Bursar: [
+                    { title:'Record Fee Payment', icon:'fa-wallet', tab:'finances', color:'bg-emerald-50 text-emerald-600' },
+                    { title:'Student SIM Wallets', icon:'fa-users', tab:'students', color:'bg-blue-50 text-blue-600' },
+                    { title:'ISO SIM Terminal', icon:'fa-microchip', tab:'sim-terminal', color:'bg-indigo-50 text-indigo-600' }
+                ],
+                Teacher: [
+                    { title:'Class Attendance', icon:'fa-clipboard-user', tab:'attendance', color:'bg-emerald-50 text-emerald-600' },
+                    { title:'Enter Grades', icon:'fa-book-open', tab:'academics', color:'bg-blue-50 text-blue-600' },
+                    { title:'Student Profiles', icon:'fa-users', tab:'students', color:'bg-indigo-50 text-indigo-600' }
+                ]
+            }[user.role] || [];
+
+            quickActionsBox.innerHTML = actions.map(act => `
+                <button onclick="switchTab('${act.tab}')" class="p-4 rounded-2xl border border-slate-200 hover:border-brand-500 hover:shadow-md transition flex items-center space-x-3 text-left bg-white">
+                    <div class="w-10 h-10 rounded-xl ${act.color} flex items-center justify-center text-lg"><i class="fa-solid ${act.icon}"></i></div>
+                    <div><div class="text-sm font-bold text-slate-900">${act.title}</div><div class="text-xs text-slate-500">Access module</div></div>
+                </button>`).join('');
+        }
+
+        /* ================= STUDENTS TABLE ================= */
+        function renderStudentsTable() {
+            const tbody = document.getElementById('students-table-body');
+            tbody.innerHTML = '';
+            const search = document.getElementById('student-search').value.toLowerCase();
+            const filtered = appState.students.filter(s =>
+                s.name.toLowerCase().includes(search) ||
+                s.iccid.toLowerCase().includes(search) ||
+                (s.sdms || '').toLowerCase().includes(search) ||
+                s.class.toLowerCase().includes(search)
+            );
+            filtered.forEach(s => {
+                const statusBadge = s.status === 'Active'
+                    ? '<span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full">Active SIM</span>'
+                    : '<span class="px-2.5 py-1 bg-rose-100 text-rose-800 text-xs font-semibold rounded-full">Suspended</span>';
+                const conductColor = s.conduct >= 80 ? 'text-brand-600' : (s.conduct >= 50 ? 'text-amber-600' : 'text-rose-600');
+                const stream = s.class + (isALevel(s.class) ? ' · ' + s.combination : ' · O-Level');
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-4">
+                            <div class="font-bold text-slate-900">${s.name}</div>
+                            <div class="text-xs text-slate-500">SDMS: <span class="font-mono">${s.sdms || '—'}</span> · ${s.phone}</div>
+                        </td>
+                        <td class="p-4 text-slate-600">${stream}</td>
+                        <td class="p-4 font-mono text-xs text-slate-600">${s.iccid}</td>
+                        <td class="p-4 font-bold text-slate-900">$${s.balance}.00</td>
+                        <td class="p-4 font-bold ${conductColor}">${s.conduct}/100</td>
+                        <td class="p-4">${statusBadge}</td>
+                        <td class="p-4 text-right">
+                            <div class="flex flex-wrap justify-end gap-1.5">
+                                <button onclick="toggleCardStatus(${s.id})" class="px-2.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition">${s.status === 'Active' ? 'Suspend' : 'Activate'}</button>
+                                <button onclick="openSwapModal(${s.id})" title="Swap SIM card" class="px-2.5 py-1.5 text-xs font-semibold rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-800 transition"><i class="fa-solid fa-exchange-alt"></i> Swap</button>
+                            </div>
+                        </td>
+                    </tr>`;
+            });
+            renderSwapRequests();
+        }
+
+        function renderSwapRequests() {
+            const panel = document.getElementById('swap-requests-panel');
+            const list = document.getElementById('swap-requests-list');
+            if (!appState.swapRequests.length) { panel.classList.add('hidden'); return; }
+            panel.classList.remove('hidden');
+            list.innerHTML = appState.swapRequests.map((r, i) => {
+                const s = appState.students.find(x => x.id === r.studentId);
+                if (!s) return '';
+                return `<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                    <div class="text-xs text-slate-700"><b>${s.name}</b> reported SIM <span class="font-mono">${r.oldIccid}</span> as <b>${r.reason}</b> on ${r.date}</div>
+                    <button onclick="processSwapRequest(${i})" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-xl transition whitespace-nowrap">Process Swap (Issue New SIM)</button>
+                </div>`;
+            }).join('');
+        }
+
+        function openAddStudentModal() {
+            const user = appState.currentUser;
+            if (!['Headmaster','DOS'].includes(user.role)) {
+                showModal('Access Denied', 'Only Headmaster and Director of Studies can register new students.', 'error');
+                return;
+            }
+            document.getElementById('modal-add-student').classList.remove('hidden');
+        }
+
+        function handleCreateStudent(event) {
+            event.preventDefault();
+            const name = document.getElementById('new-student-name').value;
+            const sdms = document.getElementById('new-student-sdms').value;
+            const cls = document.getElementById('new-student-class').value;
+            const combo = isALevel(cls) ? document.getElementById('new-student-combo').value : null;
+            const phone = document.getElementById('new-student-phone').value;
+            const iccid = document.getElementById('new-student-iccid').value;
+            if (appState.students.some(s => s.sdms === sdms)) {
+                showToast('A student with this SDMS number already exists.', 'error'); return;
+            }
+            const grades = {};
+            getSubjectsFor(cls, combo).forEach(s => grades[s] = '');
+            appState.students.push({
+                id: Math.max(0, ...appState.students.map(s => s.id)) + 1,
+                sdms, name, class: cls, combination: combo, phone, iccid,
+                balance: 0, status: 'Active', conduct: 100, grades, simSwapHistory: []
+            });
+            logAudit('Student Registered', `Added ${name} (${cls}${combo ? ' ' + combo : ''}) with ICCID ${iccid}`);
+            saveState();
+            closeModal('modal-add-student');
+            renderStudentsTable();
+            showToast('Student & SIM successfully registered!', 'success');
+        }
+
+        function toggleCardStatus(id) {
+            const user = appState.currentUser;
+            if (!['Headmaster','DOD'].includes(user.role)) {
+                showModal('Permission Denied', 'Only Headmaster and Director of Discipline can modify SIM card security states.', 'error');
+                return;
+            }
+            const student = appState.students.find(s => s.id === id);
+            if (student) {
+                student.status = student.status === 'Active' ? 'Suspended' : 'Active';
+                logAudit('SIM Status Change', `Changed ${student.name}'s card state to ${student.status}`);
+                saveState();
+                renderStudentsTable();
+                showToast(`Student SIM card status updated to ${student.status}`, 'success');
+            }
+        }
+
+        /* ================= SIM SWAP ================= */
+        let swapTargetId = null;
+        function openSwapModal(id) {
+            swapTargetId = id;
+            const s = appState.students.find(x => x.id === id);
+            document.getElementById('swap-info').innerHTML =
+                `Swapping SIM for <b>${s.name}</b> — current ICCID: <span class="font-mono">${s.iccid}</span>`;
+            document.getElementById('modal-swap').classList.remove('hidden');
+        }
+
+        function handleSwap(event) {
+            event.preventDefault();
+            doSwap(swapTargetId, document.getElementById('swap-reason').value);
+            closeModal('modal-swap');
+        }
+
+        function doSwap(id, reason) {
+            const user = appState.currentUser;
+            const s = appState.students.find(x => x.id === id);
+            if (!s) return;
+            if (user.role === 'Student') {
+                showModal('Permission Denied', 'Students cannot directly swap SIM cards. Use the Report button in your portal so the administration can process it.', 'error');
+                return;
+            }
+            if (!['Headmaster','DOD','Bursar'].includes(user.role)) {
+                showModal('Permission Denied', 'Only Headmaster, DOD and Bursar can issue replacement SIM cards.', 'error');
+                return;
+            }
+            const oldIccid = s.iccid;
+            s.iccid = genIccid();
+            s.status = 'Active';
+            s.simSwapHistory = s.simSwapHistory || [];
+            s.simSwapHistory.push({ date: nowStr(), oldIccid, newIccid: s.iccid, reason, by: user.name });
+            logAudit('SIM Card Swapped', `${s.name}: old ICCID ${oldIccid} revoked, new ICCID ${s.iccid} issued (${reason}) by ${user.name}`);
+            saveState();
+            renderStudentsTable();
+            if (appState.currentUser.role === 'Student') renderStudentPortal();
+            showToast(`New SIM issued to ${s.name}. Old chip ${oldIccid} permanently revoked.`, 'success');
+        }
+
+        function processSwapRequest(index) {
+            const req = appState.swapRequests[index];
+            const user = appState.currentUser;
+            if (!['Headmaster','DOD','Bursar'].includes(user.role)) {
+                showModal('Permission Denied', 'Only Headmaster, DOD and Bursar can process SIM swap requests.', 'error');
+                return;
+            }
+            const s = appState.students.find(x => x.id === req.studentId);
+            const oldIccid = s.iccid;
+            s.iccid = genIccid();
+            s.status = 'Active';
+            s.simSwapHistory = s.simSwapHistory || [];
+            s.simSwapHistory.push({ date: nowStr(), oldIccid, newIccid: s.iccid, reason: req.reason, by: user.name });
+            appState.swapRequests.splice(index, 1);
+            logAudit('SIM Swap Request Processed', `${s.name}: reported ${req.reason}. Old ICCID ${oldIccid} revoked, new ICCID ${s.iccid} issued by ${user.name}`);
+            saveState();
+            renderStudentsTable();
+            showToast(`Swap processed — new SIM ${s.iccid} issued to ${s.name}.`, 'success');
+        }
+
+        function studentReportSimProblem() {
+            const user = appState.currentUser;
+            const s = appState.students.find(x => x.id === user.studentId);
+            if (!s) return;
+            appState.swapRequests.push({ studentId: s.id, oldIccid: s.iccid, reason: 'Lost / Damaged (reported by student)', date: nowStr() });
+            logAudit('SIM Problem Reported', `${s.name} reported SIM ${s.iccid} as lost/damaged via student portal`);
+            saveState();
+            renderStudentPortal();
+            showToast('Report sent to the administration. They will issue your replacement SIM card.', 'success');
+        }
+
+        /* ================= ACADEMICS & REPORT CARDS ================= */
+        function renderAcademicsTable() {
+            const tbody = document.getElementById('academics-table-body');
+            tbody.innerHTML = '';
+            classRanking();
+            const sorted = [...appState.students].sort((a,b) => (a.class + a._position).localeCompare(b.class + b._position, undefined, {numeric:true}));
+            sorted.forEach(s => {
+                const avg = studentAverage(s);
+                const div = getDivision(avg);
+                const divColor = avg >= 80 ? 'bg-brand-100 text-brand-800' : avg >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800';
+                const conductColor = s.conduct >= 80 ? 'text-brand-600' : (s.conduct >= 50 ? 'text-amber-600' : 'text-rose-600');
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-4"><span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 font-bold text-sm text-slate-700">${s._position}</span></td>
+                        <td class="p-4 font-bold text-slate-900">${s.name}<div class="text-xs text-slate-500 font-mono">SDMS ${s.sdms || '—'}</div></td>
+                        <td class="p-4 text-slate-600">${s.class}</td>
+                        <td class="p-4 text-xs text-slate-600">${isALevel(s.class) ? s.combination : 'O-Level'}</td>
+                        <td class="p-4"><span class="px-2.5 py-1 bg-brand-50 text-brand-700 font-bold rounded-lg">${avg}%</span></td>
+                        <td class="p-4"><span class="px-2.5 py-1 ${divColor} text-xs font-semibold rounded-full">${div}</span></td>
+                        <td class="p-4 font-bold ${conductColor}">${s.conduct}/100</td>
+                        <td class="p-4 text-right">
+                            <div class="flex flex-wrap justify-end gap-1.5">
+                                <button onclick="openGradesEditModal(${s.id})" class="px-2.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition">Edit Marks</button>
+                                <button onclick="openReportCard(${s.id})" class="px-2.5 py-1.5 text-xs font-semibold rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-800 transition"><i class="fa-solid fa-file-lines"></i> Report Card</button>
+                            </div>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function openGradesEditModal(id) {
+            const user = appState.currentUser;
+            if (!['Headmaster','DOS','Teacher'].includes(user.role)) {
+                showModal('Access Denied', 'You do not have permission to enter or edit exam marks.', 'error');
+                return;
+            }
+            const s = appState.students.find(x => x.id === id);
+            document.getElementById('grades-edit-info').innerHTML =
+                `<b>${s.name}</b> — ${s.class}${isALevel(s.class) ? ' · ' + s.combination + ' combination' : ' · O-Level'}. Enter marks out of 100 for each subject.`;
+            const subs = getSubjectsFor(s.class, s.combination);
+            document.getElementById('grades-edit-fields').innerHTML = subs.map(sub => `
+                <div class="flex items-center justify-between gap-3">
+                    <label class="text-xs font-semibold text-slate-700">${sub}</label>
+                    <input type="number" min="0" max="100" name="grade_${sub}" value="${s.grades[sub] !== null && s.grades[sub] !== undefined && s.grades[sub] !== '' ? s.grades[sub] : ''}" placeholder="—" class="w-24 px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>`).join('');
+            document.getElementById('modal-grades').dataset.studentId = id;
+            document.getElementById('modal-grades').classList.remove('hidden');
+        }
+
+        function handleGradesEdit(event) {
+            event.preventDefault();
+            const id = parseInt(document.getElementById('modal-grades').dataset.studentId);
+            const s = appState.students.find(x => x.id === id);
+            if (!s) return;
+            const subs = getSubjectsFor(s.class, s.combination);
+            const updates = [];
+            subs.forEach(sub => {
+                const input = event.target.querySelector(`[name="grade_${CSS.escape(sub)}"]`);
+                if (input) {
+                    const val = input.value === '' ? '' : parseInt(input.value);
+                    if (val !== '' && s.grades[sub] !== val) {
+                        updates.push(`${sub}: ${s.grades[sub] === '' ? '—' : s.grades[sub]} → ${val}`);
+                        s.grades[sub] = val;
+                    }
+                }
+            });
+            logAudit('Marks Updated', `Updated marks for ${s.name}${updates.length ? ': ' + updates.join('; ') : ' (no changes)'}`);
+            saveState();
+            closeModal('modal-grades');
+            renderAcademicsTable();
+            showToast('Marks saved. Positions & report cards updated automatically!', 'success');
+        }
+
+        let currentReportStudentId = null;
+        function buildReportCard(s) {
+            const subs = getSubjectsFor(s.class, s.combination);
+            const avg = studentAverage(s);
+            const pos = positionOf(s);
+            const size = classSizeOf(s);
+            const div = getDivision(avg);
+            const rows = subs.map(sub => {
+                const m = s.grades[sub];
+                const has = m !== null && m !== undefined && m !== '';
+                return `<tr class="border-b border-slate-100">
+                    <td class="py-2 px-3 font-medium text-slate-700">${sub}</td>
+                    <td class="py-2 px-3 text-center font-bold ${has ? 'text-slate-900' : 'text-slate-400'}">${has ? m : '—'}</td>
+                    <td class="py-2 px-3 text-center font-semibold ${has ? (m >= 50 ? 'text-brand-600' : 'text-rose-600') : 'text-slate-400'}">${has ? gradeLetter(m) : '—'}</td>
+                </tr>`;
+            }).join('');
+            const remark = avg >= 80 ? 'Excellent performance. Keep it up!' : avg >= 70 ? 'Very good performance. Aim higher.' : avg >= 60 ? 'Good performance. More effort needed.' : avg >= 50 ? 'Satisfactory. Serious revision needed.' : 'Poor performance. Immediate intervention required.';
+            return `
+                <div class="border-2 border-slate-900 rounded-2xl overflow-hidden">
+                    <div class="bg-slate-900 text-white p-5 text-center">
+                        <div class="text-lg font-extrabold tracking-tight">EDUPROTOCOL ACADEMY</div>
+                        <div class="text-xs text-slate-300">Official Report Card — Rwandan Competence-Based Curriculum</div>
+                    </div>
+                    <div class="p-5 bg-white">
+                        <div class="grid grid-cols-2 gap-3 text-xs mb-4">
+                            <div><span class="text-slate-500">Student:</span> <b>${s.name}</b></div>
+                            <div><span class="text-slate-500">SDMS No:</span> <b class="font-mono">${s.sdms || '—'}</b></div>
+                            <div><span class="text-slate-500">Class:</span> <b>${s.class}</b></div>
+                            <div><span class="text-slate-500">Stream:</span> <b>${isALevel(s.class) ? s.combination + ' (A-Level)' : 'O-Level'}</b></div>
+                            <div><span class="text-slate-500">SIM ICCID:</span> <b class="font-mono">${s.iccid}</b></div>
+                            <div><span class="text-slate-500">Issued:</span> <b>${new Date().toDateString()}</b></div>
+                        </div>
+                        <table class="w-full text-sm border border-slate-200 rounded-xl overflow-hidden mb-4">
+                            <thead><tr class="bg-slate-100 text-slate-600 text-xs uppercase">
+                                <th class="py-2 px-3 text-left">Subject</th>
+                                <th class="py-2 px-3 text-center">Marks /100</th>
+                                <th class="py-2 px-3 text-center">Grade</th>
+                            </tr></thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs mb-4">
+                            <div class="bg-brand-50 rounded-xl p-3"><div class="text-slate-500">Average</div><div class="text-lg font-bold text-brand-700">${avg}%</div></div>
+                            <div class="bg-indigo-50 rounded-xl p-3"><div class="text-slate-500">Position</div><div class="text-lg font-bold text-indigo-700">${pos}<span class="text-xs text-slate-500">/${size}</span></div></div>
+                            <div class="bg-amber-50 rounded-xl p-3"><div class="text-slate-500">Division</div><div class="text-xs font-bold text-amber-700 mt-1">${div}</div></div>
+                            <div class="bg-slate-100 rounded-xl p-3"><div class="text-slate-500">Conduct</div><div class="text-lg font-bold text-slate-800">${s.conduct}/100</div></div>
+                        </div>
+                        <div class="text-xs text-slate-600 bg-slate-50 rounded-xl p-3">
+                            <b>Class Teacher's Remark:</b> ${remark}
+                        </div>
+                        <div class="flex justify-between mt-6 text-[10px] text-slate-400">
+                            <span>Generated by EduProtocol SIM OS v4.0</span>
+                            <span>Headmaster's Signature: ______________________</span>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function openReportCard(id) {
+            const s = appState.students.find(x => x.id === id);
+            if (!s) return;
+            currentReportStudentId = id;
+            document.getElementById('report-card-content').innerHTML = buildReportCard(s);
+            document.getElementById('modal-report').classList.remove('hidden');
+        }
+
+        function viewMyReportCard() {
+            const user = appState.currentUser;
+            const s = appState.students.find(x => x.id === user.studentId);
+            if (s) openReportCard(s.id);
+        }
+
+        function printCurrentReportCard() {
+            const s = appState.students.find(x => x.id === currentReportStudentId);
+            if (!s) return;
+            const w = window.open('', '_blank');
+            w.document.write(`<html><head><title>Report Card — ${s.name}</title>
+                <script src="https://cdn.tailwindcss.com"><\/script></head>
+                <body class="bg-white p-6">${buildReportCard(s)}
+                <script>window.onload=()=>window.print()<\/script></body></html>`);
+            w.document.close();
+        }
+
+        function downloadCurrentReportCard() {
+            const s = appState.students.find(x => x.id === currentReportStudentId);
+            if (!s) return;
+            const subs = getSubjectsFor(s.class, s.combination);
+            const avg = studentAverage(s);
+            const rows = [
+                ['EDUPROTOCOL ACADEMY - OFFICIAL REPORT CARD'],
+                ['Student', s.name, 'SDMS', s.sdms],
+                ['Class', s.class, 'Stream', isALevel(s.class) ? s.combination + ' (A-Level)' : 'O-Level'],
+                [],
+                ['Subject', 'Marks /100', 'Grade'],
+                ...subs.map(sub => [sub, s.grades[sub] ?? '—', s.grades[sub] !== '' && s.grades[sub] != null ? gradeLetter(s.grades[sub]) : '—']),
+                [],
+                ['Average', avg + '%', 'Position', positionOf(s) + '/' + classSizeOf(s)],
+                ['Division', getDivision(avg), 'Conduct', s.conduct + '/40'],
+                ['Issued', new Date().toDateString()]
+            ];
+            downloadCSV(`reportcard_${s.name.replace(/\s+/g,'_')}_${s.sdms || s.id}.csv`, ['Item','Value','Item 2','Value 2'], rows);
+        }
+
+        function downloadAllReportCards() {
+            classRanking();
+            const rows = [['Student','SDMS','Class','Stream','Average','Position','Total in Class','Division','Conduct']];
+            appState.students.forEach(s => {
+                rows.push([s.name, s.sdms, s.class, isALevel(s.class) ? s.combination : 'O-Level',
+                    studentAverage(s) + '%', s._position, classSizeOf(s), getDivision(studentAverage(s)), s.conduct + '/40']);
+            });
+            downloadCSV('all_report_cards_summary.csv', rows[0], rows.slice(1));
+            showToast('All report cards summary downloaded.', 'success');
+        }
+
+        /* ================= DISCIPLINE & CONDUCT ================= */
+        function renderDisciplineTable() {
+            const tbody = document.getElementById('discipline-table-body');
+            tbody.innerHTML = '';
+            appState.discipline.forEach(d => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-4 text-xs font-mono text-slate-500">${d.time}</td>
+                        <td class="p-4 font-bold text-slate-900">${d.student}</td>
+                        <td class="p-4 text-slate-700">${d.infraction}</td>
+                        <td class="p-4"><span class="px-2.5 py-1 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full">${d.action}</span></td>
+                        <td class="p-4 text-xs font-bold text-rose-600">${d.points ? '-' + d.points + ' pts' : '—'}</td>
+                        <td class="p-4 text-xs text-slate-500">${d.admin}</td>
+                    </tr>`;
+            });
+        }
+
+        function openDisciplineModal() {
+            const user = appState.currentUser;
+            if (!['Headmaster','DOD'].includes(user.role)) {
+                showModal('Access Denied', 'Only Headmaster and Director of Discipline can log infractions and deduct conduct.', 'error');
+                return;
+            }
+            populateStudentSelect('disc-student-select');
+            document.getElementById('modal-discipline').classList.remove('hidden');
+        }
+
+        function handleDisciplineLog(event) {
+            event.preventDefault();
+            const studentId = parseInt(document.getElementById('disc-student-select').value);
+            const reason = document.getElementById('disc-reason').value;
+            const action = document.getElementById('disc-action').value;
+            const points = parseInt(document.getElementById('disc-points').value) || 0;
+            const student = appState.students.find(s => s.id === studentId);
+            if (student) {
+                if (action === 'SIM Card Suspended') student.status = 'Suspended';
+                student.conduct = Math.max(0, student.conduct - points);
+                appState.discipline.unshift({
+                    time: nowStr(), student: student.name, infraction: reason, action, points, admin: appState.currentUser.name
+                });
+                logAudit('Disciplinary Log', `${action} (-${points} conduct) for ${student.name}: ${reason}`);
+                saveState();
+                closeModal('modal-discipline');
+                renderDisciplineTable();
+                showToast(`Action recorded. ${student.name}'s conduct is now ${student.conduct}/100.`, 'success');
+            }
+        }
+
+        /* ================= FINANCES ================= */
+        function renderFinancesTable() {
+            const tbody = document.getElementById('finance-table-body');
+            tbody.innerHTML = '';
+            let totalCollected = 0;
+            appState.finances.forEach(f => {
+                totalCollected += f.amount;
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-4 font-mono text-xs text-slate-600">${f.txId}</td>
+                        <td class="p-4 font-bold text-slate-900">${f.student}</td>
+                        <td class="p-4"><span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full">${f.type}</span></td>
+                        <td class="p-4 font-bold text-emerald-600">+$${f.amount}.00</td>
+                        <td class="p-4 text-xs text-slate-600">${f.method}</td>
+                        <td class="p-4 text-xs text-slate-500">${f.bursar}</td>
+                        <td class="p-4 text-xs text-slate-400">${f.date}</td>
+                    </tr>`;
+            });
+            document.getElementById('fin-total-collected').innerText = `$${totalCollected}.00`;
+            document.getElementById('fin-total-outstanding').innerText = `$1,250.00`;
+            document.getElementById('fin-wallet-topups').innerText = `$${appState.finances.filter(f => f.type === 'Wallet Top-up').reduce((a,b) => a + b.amount, 0)}.00`;
+        }
+
+        function openFeePaymentModal() {
+            const user = appState.currentUser;
+            if (!['Headmaster','Bursar'].includes(user.role)) {
+                showModal('Access Denied', 'Only Headmaster and School Bursar can collect fees or manage financial ledgers.', 'error');
+                return;
+            }
+            populateStudentSelect('fee-student-select');
+            document.getElementById('modal-fee').classList.remove('hidden');
+        }
+
+        function handleFeePayment(event) {
+            event.preventDefault();
+            const studentId = parseInt(document.getElementById('fee-student-select').value);
+            const amount = parseFloat(document.getElementById('fee-amount').value);
+            const method = document.getElementById('fee-method').value;
+            const student = appState.students.find(s => s.id === studentId);
+            if (student) {
+                student.balance += amount;
+                const txId = 'TXN-' + Math.floor(1000 + Math.random() * 9000);
+                appState.finances.unshift({ txId, student: student.name, type: 'Fee Deposit', amount, method, bursar: appState.currentUser.name, date: nowStr() });
+                logAudit('Fee Payment', `Received $${amount} for ${student.name} via ${method}`);
+                saveState();
+                closeModal('modal-fee');
+                renderFinancesTable();
+                showToast(`Successfully processed payment of $${amount} for ${student.name}!`, 'success');
+            }
+        }
+
+        /* ================= ATTENDANCE ================= */
+        function renderAttendanceTable() {
+            const tbody = document.getElementById('attendance-table-body');
+            tbody.innerHTML = '';
+            document.getElementById('attendance-date').innerText = new Date().toDateString();
+            appState.students.forEach(s => {
+                const isPresent = appState.attendance[s.id] !== false;
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-4 font-bold text-slate-900">${s.name}</td>
+                        <td class="p-4 text-slate-600">${s.class}</td>
+                        <td class="p-4 font-mono text-xs text-slate-600">${s.iccid}</td>
+                        <td class="p-4 text-center">
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" ${isPresent ? 'checked' : ''} onchange="toggleAttendance(${s.id}, this.checked)" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600 relative"></div>
+                            </label>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function toggleAttendance(studentId, status) { appState.attendance[studentId] = status; saveState(); }
+
+        function saveAttendance() {
+            const user = appState.currentUser;
+            if (!['Headmaster','DOS','Teacher'].includes(user.role)) {
+                showModal('Access Denied', 'Only teachers and academic staff can submit daily classroom attendance.', 'error');
+                return;
+            }
+            logAudit('Attendance Logged', `Daily classroom roll call submitted by ${user.name}`);
+            saveState();
+            showToast('Classroom attendance register successfully saved!', 'success');
+        }
+
+        /* ================= STUDENT PORTAL ================= */
+        function renderStudentPortal() {
+            const user = appState.currentUser;
+            const s = appState.students.find(x => x.id === user.studentId);
+            if (!s) return;
+            classRanking();
+
+            document.getElementById('portal-profile').innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-brand-600 text-white rounded-2xl flex items-center justify-center text-xl font-bold">${s.name.charAt(0)}</div>
+                    <div>
+                        <div class="font-bold text-slate-900">${s.name}</div>
+                        <div class="text-xs text-slate-500">${s.class}${isALevel(s.class) ? ' · ' + s.combination : ' · O-Level'}</div>
+                    </div>
+                </div>
+                <div class="text-xs text-slate-600 space-y-1.5 pt-2">
+                    <div class="flex justify-between"><span>SDMS Number</span><b class="font-mono">${s.sdms || '—'}</b></div>
+                    <div class="flex justify-between"><span>Phone</span><b>${s.phone}</b></div>
+                    <div class="flex justify-between"><span>Class Position</span><b class="text-indigo-600">${positionOf(s)} / ${classSizeOf(s)}</b></div>
+                </div>`;
+
+            document.getElementById('portal-iccid').innerText = s.iccid;
+            document.getElementById('portal-card-status').innerText = s.status === 'Active' ? 'Card Active' : 'Card Suspended';
+            document.getElementById('portal-card-status').className = 'text-[10px] font-semibold ' + (s.status === 'Active' ? 'text-emerald-400' : 'text-rose-400');
+            document.getElementById('portal-card-dot').className = 'w-2.5 h-2.5 rounded-full ' + (s.status === 'Active' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500');
+
+            document.getElementById('portal-balance').innerText = `$${s.balance}.00`;
+            document.getElementById('portal-conduct').innerText = `${s.conduct} / 100`;
+            document.getElementById('portal-conduct-bar').style.width = s.conduct + '%';
+            document.getElementById('portal-conduct-bar').className = 'h-2 rounded-full ' + (s.conduct >= 80 ? 'bg-brand-500' : (s.conduct >= 50 ? 'bg-amber-500' : 'bg-rose-500'));
+
+            const subs = getSubjectsFor(s.class, s.combination);
+            document.getElementById('portal-grades').innerHTML = subs.map(sub => {
+                const m = s.grades[sub];
+                const has = m !== null && m !== undefined && m !== '';
+                const color = has ? (m >= 50 ? 'text-brand-600' : 'text-rose-600') : 'text-slate-400';
+                return `<div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                    <span class="text-xs font-medium text-slate-700">${sub}</span>
+                    <span class="text-sm font-bold ${color}">${has ? m + ' / 100  (' + gradeLetter(m) + ')' : 'Not yet graded'}</span>
+                </div>`;
+            }).join('');
+
+            const avg = studentAverage(s);
+            document.getElementById('portal-summary').innerHTML = `
+                <div class="px-3 py-1.5 bg-brand-50 text-brand-800 rounded-xl text-xs font-bold">Average: ${avg}%</div>
+                <div class="px-3 py-1.5 bg-indigo-50 text-indigo-800 rounded-xl text-xs font-bold">Position: ${positionOf(s)} / ${classSizeOf(s)}</div>
+                <div class="px-3 py-1.5 bg-amber-50 text-amber-800 rounded-xl text-xs font-bold">${getDivision(avg)}</div>
+                <div class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold">Attendance: ${appState.attendance[s.id] !== false ? 'Present' : 'Absent'}</div>`;
+
+            const myDisc = appState.discipline.filter(d => d.student === s.name);
+            document.getElementById('portal-discipline').innerHTML = myDisc.length
+                ? myDisc.map(d => `<div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs">
+                    <div class="font-semibold text-slate-800">${d.infraction}</div>
+                    <div class="text-slate-500 mt-1">${d.action} · <b class="text-rose-600">-${d.points} conduct</b> · ${d.time}</div>
+                </div>`).join('')
+                : '<div class="p-3 bg-brand-50 border border-brand-200 rounded-xl text-xs text-brand-800">No disciplinary records. Keep up the good conduct!</div>';
+        }
+
+        /* ================= SIM TERMINAL ================= */
+        function simulateCardInsert() {
+            const student = appState.students[Math.floor(Math.random() * appState.students.length)];
+            document.getElementById('terminal-iccid-display').innerText = student.iccid;
+            document.getElementById('terminal-student-display').innerText = student.name;
+            document.getElementById('terminal-status-dot').className = student.status === 'Active' ? 'w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse' : 'w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse';
+            appendApduLog(`[ISO 7816] SIM Inserted. ICCID: ${student.iccid}`);
+            appendApduLog(`[APDU] >> SELECT (DF_TELECOM): 00 A4 04 00 07 A0 00 00 00 03 10 10`);
+            appendApduLog(`[APDU] << SW: 90 00 (Success - Student: ${student.name}, Status: ${student.status})`);
+        }
+        function simulateCardEject() {
+            document.getElementById('terminal-iccid-display').innerText = '892560...';
+            document.getElementById('terminal-student-display').innerText = 'Not Inserted';
+            document.getElementById('terminal-status-dot').className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
+            appendApduLog(`[ISO 7816] SIM Ejected. Hardware session terminated.`);
+        }
+        function sendApduCommand() {
+            const input = document.getElementById('apdu-input');
+            const cmd = input.value.trim();
+            if (!cmd) return;
+            appendApduLog(`[APDU] >> ${cmd}`);
+            setTimeout(() => appendApduLog(`[APDU] << SW: 90 00 (Command executed successfully)`), 300);
+            input.value = '';
+        }
+        function appendApduLog(text) {
+            const box = document.getElementById('apdu-log-box');
+            box.innerHTML += `<div>${text}</div>`;
+            box.scrollTop = box.scrollHeight;
+        }
+        function clearApduLog() {
+            document.getElementById('apdu-log-box').innerHTML = '<div class="text-slate-500">[System] APDU Log cleared.</div>';
+        }
+
+        /* ================= AUDIT ================= */
+        function logAudit(action, details) {
+            if (!appState.currentUser) return;
+            appState.auditLogs.unshift({ time: nowStr(), admin: appState.currentUser.name, role: appState.currentUser.roleBadge, action, details });
+            saveState();
+        }
+
+        function renderAuditTable() {
+            const tbody = document.getElementById('audit-table-body');
+            tbody.innerHTML = '';
+            appState.auditLogs.forEach(a => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-4 text-xs font-mono text-slate-500">${a.time}</td>
+                        <td class="p-4 font-bold text-slate-900">${a.admin}</td>
+                        <td class="p-4"><span class="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-full">${a.role}</span></td>
+                        <td class="p-4 text-brand-700 font-semibold">${a.action}</td>
+                        <td class="p-4 text-xs text-slate-600">${a.details}</td>
+                    </tr>`;
+            });
+        }
+
+        /* ================= DOWNLOADS (CSV) ================= */
+        function downloadCSV(filename, headers, rows) {
+            const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${String(c ?? '').replace(/"/g,'""')}"`).join(','))].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        function downloadAuditCSV() {
+            downloadCSV('audit_logs.csv', ['Timestamp','Administrator','Role','Action','Details'],
+                appState.auditLogs.map(a => [a.time, a.admin, a.role, a.action, a.details]));
+            showToast('Audit logs exported to secure CSV format.', 'success');
+        }
+
+        function downloadFullHistory() {
+            const rows = [['Section','Timestamp','Person','Role','Event','Details']];
+            appState.auditLogs.forEach(a => rows.push(['Audit', a.time, a.admin, a.role, a.action, a.details]));
+            appState.finances.forEach(f => rows.push(['Finance', f.date, f.student, '—', f.type + ' (' + f.method + ')', '$' + f.amount + ' by ' + f.bursar]));
+            appState.discipline.forEach(d => rows.push(['Discipline', d.time, d.student, '—', d.action, d.infraction + ' (-' + d.points + ' conduct) by ' + d.admin]));
+            appState.students.forEach(s => (s.simSwapHistory || []).forEach(h => rows.push(['SIM Swap', h.date, s.name, '—', h.reason, `Old: ${h.oldIccid} → New: ${h.newIccid} by ${h.by}`])));
+            downloadCSV('eduprotocol_full_history.csv', rows[0], rows.slice(1));
+            showToast('Complete system history downloaded.', 'success');
+        }
+
+        function downloadFinanceCSV() {
+            downloadCSV('finance_ledger.csv', ['Txn ID','Student','Type','Amount','Method','Bursar','Date'],
+                appState.finances.map(f => [f.txId, f.student, f.type, '$' + f.amount, f.method, f.bursar, f.date]));
+            showToast('Finance ledger downloaded.', 'success');
+        }
+
+        function downloadDisciplineCSV() {
+            downloadCSV('discipline_logs.csv', ['Timestamp','Student','Infraction','Action','Conduct Points','Logged By'],
+                appState.discipline.map(d => [d.time, d.student, d.infraction, d.action, d.points, d.admin]));
+            showToast('Discipline logs downloaded.', 'success');
+        }
+
+        function downloadStudentRegistry() {
+            downloadCSV('student_registry.csv', ['ID','Name','SDMS','Class','Stream','Phone','ICCID','Wallet','Conduct','Status'],
+                appState.students.map(s => [s.id, s.name, s.sdms, s.class, isALevel(s.class) ? s.combination : 'O-Level', s.phone, s.iccid, '$' + s.balance, s.conduct, s.status]));
+            showToast('Student registry downloaded.', 'success');
+        }
+
+        /* ================= UI HELPERS ================= */
+        function populateStudentSelect(elementId) {
+            const select = document.getElementById(elementId);
+            select.innerHTML = '';
+            appState.students.forEach(s => {
+                select.innerHTML += `<option value="${s.id}">${s.name} (${s.class}${isALevel(s.class) ? ' ' + s.combination : ''})</option>`;
+            });
+        }
+
+        function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
+
+        function showModal(title, message, type = 'info') {
+            const backdrop = document.getElementById('custom-modal-backdrop');
+            const box = document.getElementById('custom-modal-box');
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+            const iconWrapper = document.getElementById('modal-icon-wrapper');
+            if (type === 'error') {
+                iconWrapper.className = 'w-12 h-12 rounded-full flex items-center justify-center text-xl bg-rose-100 text-rose-600';
+                iconWrapper.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            } else {
+                iconWrapper.className = 'w-12 h-12 rounded-full flex items-center justify-center text-xl bg-brand-100 text-brand-600';
+                iconWrapper.innerHTML = '<i class="fa-solid fa-shield-halved"></i>';
+            }
+            document.getElementById('modal-actions').innerHTML = `
+                <button onclick="closeCustomModal()" class="px-5 py-2.5 bg-slate-900 text-white font-semibold rounded-xl text-sm hover:bg-slate-800 transition">Acknowledge</button>`;
+            backdrop.classList.remove('hidden');
+            setTimeout(() => {
+                box.classList.remove('scale-95','opacity-0');
+                box.classList.add('scale-100','opacity-100');
+            }, 10);
+        }
+
+        function closeCustomModal() {
+            const backdrop = document.getElementById('custom-modal-backdrop');
+            const box = document.getElementById('custom-modal-box');
+            box.classList.remove('scale-100','opacity-100');
+            box.classList.add('scale-95','opacity-0');
+            setTimeout(() => backdrop.classList.add('hidden'), 150);
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-slate-900 text-white border-brand-500' : (type === 'info' ? 'bg-blue-600 text-white border-blue-700' : 'bg-rose-600 text-white border-rose-700');
+            const icon = type === 'success' ? 'fa-circle-check text-brand-400' : (type === 'info' ? 'fa-circle-info text-blue-200' : 'fa-circle-exclamation text-rose-200');
+            toast.className = `flex items-center space-x-3 px-4 py-3 rounded-2xl shadow-xl border ${bgClass} transform translate-y-4 opacity-0 transition-all duration-300 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><div class="text-xs font-semibold">${message}</div>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-y-4','opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-4','opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+    </script>
+</body>
+ 
+ */
+(() => {
+    "use strict";
+
+    const STORAGE = "eduprotocol_schools_v5";
+    const SESSION = "eduprotocol_session_v5";
+
+    let database = { version: 5, schools: [] };
+    let activeSchoolId = null;
+    let accountBusy = false;
+
+    const original = {
+        start: startAppSession,
+        report: buildReportCard,
+        attendance: renderAttendanceTable,
+        studentPortal: renderStudentPortal,
+        students: renderStudentsTable,
+        createStudent: handleCreateStudent,
+        dashboard: renderDashboard
+    };
+
+    const $ = id => document.getElementById(id);
+    const uid = () => crypto.randomUUID();
+    const escapeHTML = value => String(value ?? "").replace(
+        /[&<>"']/g,
+        char => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        })[char]
+    );
+
+    const fieldClass =
+        "w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-sm";
+
+    const buttonClass =
+        "px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700";
+
+    const roles = ["Headmaster", "DOS", "DOD", "Bursar", "Teacher"];
+    const badges = {
+        Headmaster: "Head Teacher",
+        DOS: "Dir. of Studies",
+        DOD: "Dir. of Discipline",
+        Bursar: "School Bursar",
+        Teacher: "Class Teacher",
+        Student: "Student"
+    };
+
+    const pathwayDefinitions = {
+        "Mathematics and Sciences - Stream 1": [
+            "Mathematics", "Physics", "Chemistry", "Biology",
+            "English", "French", "Kinyarwanda", "ICT", "Entrepreneurship"
+        ],
+        "Mathematics and Sciences - Stream 2": [
+            "Mathematics", "Economics", "Geography", "Physics",
+            "English", "French", "Kinyarwanda", "ICT", "Entrepreneurship"
+        ],
+        "Arts and Humanities": [
+            "History", "Geography", "Literature in English", "Psychology",
+            "Basic Mathematics", "French", "Kinyarwanda",
+            "English", "ICT", "Entrepreneurship"
+        ],
+        "Languages": [
+            "English", "French", "Kinyarwanda", "Kiswahili",
+            "History", "Psychology", "Basic Mathematics",
+            "ICT", "Entrepreneurship"
+        ],
+        "ANP": [],
+        "TVET": []
+    };
+
+    // Keep existing combinations and add new pathways.
+    Object.entries(pathwayDefinitions).forEach(([name, subjects]) => {
+        A_LEVEL_COMBOS[name] = [...subjects];
+    });
+
+    function school() {
+        return database.schools.find(item => item.id === activeSchoolId);
+    }
+
+    function requireRole(allowed) {
+        if (!appState.currentUser ||
+            appState.currentUser.disabled ||
+            !allowed.includes(appState.currentUser.role)) {
+            showModal(
+                "Access Denied",
+                "Your account does not have permission for this action.",
+                "error"
+            );
+            return false;
+        }
+        return true;
+    }
+
+    function blankState() {
+        return {
+            users: [],
+            students: [],
+            finances: [],
+            discipline: [],
+            attendance: {},
+            attendanceByDate: {},
+            auditLogs: [],
+            swapRequests: [],
+            announcements: [],
+            currentUser: null
+        };
+    }
+
+    function persistDatabase() {
+        try {
+            localStorage.setItem(STORAGE, JSON.stringify(database));
+            return true;
+        } catch (error) {
+            showToast(
+                "Storage could not be saved. Export a backup and check browser storage.",
+                "error"
+            );
+            return false;
+        }
+    }
+
+    saveState = function() {
+        const current = school();
+        if (!current) return false;
+        const { currentUser, ...stored } = appState;
+        current.state = stored;
+        return persistDatabase();
+    };
+
+    loadState = function() {
+        try {
+            const stored = localStorage.getItem(STORAGE);
+            database = stored ? JSON.parse(stored) : { version: 5, schools: [] };
+            if (!Array.isArray(database.schools)) {
+                throw new Error("Invalid storage");
+            }
+        } catch (error) {
+            database = { version: 5, schools: [] };
+            showToast(
+                "School storage could not be read. Existing storage was not overwritten.",
+                "error"
+            );
+        }
+        appState = blankState();
+    };
+
+    // Password hashing improves storage hygiene, but does not make
+    // client-side accounts or browser authorization production-secure.
+    async function passwordHash(password, salt) {
+        const key = await crypto.subtle.importKey(
+            "raw",
+            new TextEncoder().encode(password),
+            "PBKDF2",
+            false,
+            ["deriveBits"]
+        );
+
+        const bits = await crypto.subtle.deriveBits({
+            name: "PBKDF2",
+            salt: new TextEncoder().encode(salt),
+            iterations: 210000,
+            hash: "SHA-256"
+        }, key, 256);
+
+        return Array.from(new Uint8Array(bits))
+            .map(value => value.toString(16).padStart(2, "0"))
+            .join("");
+    }
+
+    async function credentials(password) {
+        if (password.length < 8) {
+            throw new Error("Use a password with at least 8 characters.");
+        }
+        const salt = uid();
+        return {
+            salt,
+            passwordHash: await passwordHash(password, salt)
+        };
+    }
+
+    function bindSchool(record, user) {
+        activeSchoolId = record.id;
+        appState = record.state;
+        appState.currentUser = user;
+        appState.attendanceByDate ||= {};
+        appState.announcements ||= [];
+        appState.swapRequests ||= [];
+        appState.attendance =
+            appState.attendanceByDate[localDate()] || {};
+    }
+
+    function localDate() {
+        const parts = new Intl.DateTimeFormat("en-CA", {
+            timeZone: "Africa/Kigali",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+        }).formatToParts(new Date());
+
+        const value = type => parts.find(part => part.type === type).value;
+        return `${value("year")}-${value("month")}-${value("day")}`;
+    }
+
+    function input(label, name, type = "text", extra = "") {
+        return `
+            <label class="block text-xs font-semibold text-slate-600">
+                ${label}
+                <input name="${name}" type="${type}"
+                    class="${fieldClass} mt-1" ${extra}>
+            </label>`;
+    }
+
+    function buildAuthentication() {
+        const card = $("auth-screen").firstElementChild;
+        card.innerHTML = `
+            <div class="text-center mb-6">
+                <div class="text-3xl text-brand-600 mb-3">
+                    <i class="fa-solid fa-school"></i>
+                </div>
+                <h1 class="text-2xl font-bold">EduProtocol</h1>
+                <p class="text-sm text-slate-500 mt-2">
+                    Sign in with your own school account.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mb-5">
+                <button id="v5-login-tab" class="${buttonClass}">Sign In</button>
+                <button id="v5-register-tab"
+                    class="px-4 py-2 rounded-xl bg-slate-100 text-sm font-semibold">
+                    Register a School
+                </button>
+            </div>
+
+            <form id="v5-login-form" class="space-y-4">
+                ${input("Email or SDMS Number", "identifier", "text",
+                    'required autocomplete="username"')}
+                ${input("Password", "password", "password",
+                    'required autocomplete="current-password"')}
+                <button class="${buttonClass} w-full" type="submit">
+                    Sign In
+                </button>
+                <p class="text-xs text-slate-500">
+                    Staff and student accounts are issued by the headmaster.
+                    No role selection is needed at login.
+                </p>
+            </form>
+
+            <form id="v5-school-form" class="space-y-4 hidden">
+                ${input("School Name", "schoolName", "text", "required")}
+                ${input("School Code", "code", "text", "required")}
+                ${input("School Address", "address", "text", "required")}
+                ${input("School Motto", "motto")}
+                ${input("Headmaster Full Name", "name", "text", "required")}
+                ${input("Headmaster Email", "email", "email",
+                    'required autocomplete="username"')}
+                ${input("Password", "password", "password",
+                    'required minlength="8" autocomplete="new-password"')}
+                ${input("School Badge - PNG or JPEG, maximum 500 KB",
+                    "badge", "file", 'accept="image/png,image/jpeg"')}
+                <button class="${buttonClass} w-full" type="submit">
+                    Create School and Headmaster Account
+                </button>
+                <p class="text-xs text-slate-500">
+                    Prototype: registering a school here does not verify
+                    school ownership or official accreditation.
+                </p>
+            </form>
+
+            <p class="text-xs text-amber-700 mt-6">
+                Browser prototype. Records are stored on this device.
+            </p>`;
+
+        $("v5-login-tab").onclick = () => {
+            $("v5-login-form").classList.remove("hidden");
+            $("v5-school-form").classList.add("hidden");
+        };
+        $("v5-register-tab").onclick = () => {
+            $("v5-login-form").classList.add("hidden");
+            $("v5-school-form").classList.remove("hidden");
+        };
+        $("v5-login-form").onsubmit = login;
+        $("v5-school-form").onsubmit = registerSchool;
+    }
+
+    async function readBadge(file) {
+        if (!file || !file.size) return "";
+        if (!["image/png", "image/jpeg"].includes(file.type)) {
+            throw new Error("Upload a PNG or JPEG badge.");
+        }
+        if (file.size > 500 * 1024) {
+            throw new Error("Badge must be smaller than 500 KB.");
+        }
+        const data = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+        await new Promise((resolve, reject) => {
+            const image = new Image();
+            image.onload = resolve;
+            image.onerror = () => reject(new Error("Invalid badge image."));
+            image.src = data;
+        });
+        return data;
+    }
+
+    async function registerSchool(event) {
+        event.preventDefault();
+        if (accountBusy) return;
+        accountBusy = true;
+
+        try {
+            const data = new FormData(event.target);
+            const email = data.get("email").trim().toLowerCase();
+            const code = data.get("code").trim().toUpperCase();
+
+            if (database.schools.some(item =>
+                item.code === code ||
+                item.state.users.some(user => user.email === email)
+            )) {
+                throw new Error("School code or email is already registered.");
+            }
+
+            const password = await credentials(data.get("password"));
+            const badge = await readBadge(data.get("badge"));
+            const state = blankState();
+            delete state.currentUser;
+
+            const user = {
+                id: uid(),
+                type: "staff",
+                name: data.get("name").trim(),
+                email,
+                role: "Headmaster",
+                roleBadge: badges.Headmaster,
+                disabled: false,
+                ...password
+            };
+            state.users.push(user);
+
+            const record = {
+                id: uid(),
+                name: data.get("schoolName").trim(),
+                code,
+                address: data.get("address").trim(),
+                motto: data.get("motto").trim(),
+                badge,
+                academicYear: String(new Date().getFullYear()),
+                term: "Term 1",
+                currency: "RWF",
+                professionalSubjects: { ANP: [], TVET: [] },
+                state
+            };
+
+            database.schools.push(record);
+
+            if (!persistDatabase()) {
+                database.schools.pop();
+                return;
+            }
+
+            bindSchool(record, user);
+            sessionStorage.setItem(SESSION, JSON.stringify({
+                schoolId: record.id, userId: user.id
+            }));
+            logAudit("School Registered", `${record.name} (${record.code})`);
+            startAppSession();
+            showToast("School registered. Your headmaster account is ready.");
+        } catch (error) {
+            showToast(error.message || "School registration failed.", "error");
+        } finally {
+            accountBusy = false;
+        }
+    }
+
+    async function login(event) {
+        event.preventDefault();
+        if (accountBusy) return;
+        accountBusy = true;
+
+        try {
+            const data = new FormData(event.target);
+            const identifier = data.get("identifier").trim().toLowerCase();
+            const password = data.get("password");
+            let match = null;
+
+            for (const record of database.schools) {
+                const user = record.state.users.find(account =>
+                    !account.disabled &&
+                    (account.email?.toLowerCase() === identifier ||
+                     account.sdms === identifier)
+                );
+
+                if (user && user.salt && user.passwordHash &&
+                    await passwordHash(password, user.salt) === user.passwordHash) {
+                    match = { record, user };
+                    break;
+                }
+            }
+
+            if (!match) throw new Error("Invalid account or password.");
+
+            bindSchool(match.record, match.user);
+            sessionStorage.setItem(SESSION, JSON.stringify({
+                schoolId: match.record.id,
+                userId: match.user.id
+            }));
+            logAudit("User Login", "Signed in using personal account.");
+            event.target.reset();
+            startAppSession();
+        } catch (error) {
+            showToast(error.message || "Sign-in failed.", "error");
+        } finally {
+            accountBusy = false;
+        }
+    }
+
+    logout = function() {
+        if (appState.currentUser) {
+            logAudit("User Logout", "Account signed out.");
+        }
+        sessionStorage.removeItem(SESSION);
+        activeSchoolId = null;
+        appState = blankState();
+        document.querySelectorAll('body > div[id^="modal-"]')
+            .forEach(modal => modal.classList.add("hidden"));
+        $("custom-modal-backdrop").classList.add("hidden");
+        $("app-wrapper").classList.add("hidden");
+        $("auth-screen").classList.remove("hidden");
+        $("v5-login-form").reset();
+    };
+
+    // Replace old public registration/login entry points.
+    handleLogin = login;
+    handleStudentLogin = login;
+    handleStaffRegister = function(event) {
+        event.preventDefault();
+        showModal(
+            "Headmaster Approval Required",
+            "The headmaster creates staff accounts in School Management."
+        );
+    };
+    handleStudentRegister = function(event) {
+        event.preventDefault();
+        showModal(
+            "School Registration Required",
+            "Ask your headmaster to register your student profile and issue your account."
+        );
+    };
+
+    getSubjectsFor = function(cls, combo) {
+        if (O_LEVEL_CLASSES.includes(cls)) return [...O_LEVEL_SUBJECTS];
+
+        if (combo === "ANP" || combo === "TVET") {
+            return [...(school()?.professionalSubjects?.[combo] || [])];
+        }
+
+        if (Object.hasOwn(pathwayDefinitions, combo)) {
+            return [...pathwayDefinitions[combo]];
+        }
+
+        return [...(A_LEVEL_COMBOS[combo] || []), ...SUBSIDIARY];
+    };
+
+    function addManagementModule() {
+        if ($("tab-school-management")) return;
+
+        const nav = document.createElement("button");
+        nav.id = "nav-school-management";
+        nav.className =
+            "nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm";
+        nav.dataset.roles = "Headmaster";
+        nav.innerHTML =
+            '<i class="fa-solid fa-school"></i><span>School Management</span>';
+        nav.onclick = () => {
+            if (!requireRole(["Headmaster"])) return;
+            switchTab("school-management");
+            renderManagement();
+        };
+        $("sidebar").querySelector("nav").appendChild(nav);
+
+        const content = document.createElement("section");
+        content.id = "tab-school-management";
+        content.className = "tab-content hidden space-y-6";
+        $("admin-view").appendChild(content);
+    }
+
+    startAppSession = function() {
+        addManagementModule();
+        original.start();
+
+        $("header-mode-badge").textContent = school().name;
+
+        if (!$("v5-system-print")) {
+            const button = document.createElement("button");
+            button.id = "v5-system-print";
+            button.className =
+                "px-3 py-2 bg-slate-100 rounded-xl text-xs font-semibold";
+            button.innerHTML = '<i class="fa-solid fa-print"></i> Print';
+            button.onclick = printVisibleModule;
+            $("app-wrapper").querySelector("header").lastElementChild
+                .prepend(button);
+        }
+
+        // Do not imply that a browser demo has hardware-backed security.
+        const securityCard = $("tab-dashboard")
+            .querySelector(".lg\\:col-span-3");
+        $("tab-dashboard").querySelectorAll(
+            ".space-y-4.flex-1 > div > span:last-child"
+        ).forEach(badge => {
+            badge.textContent = "DEMO";
+        });
+
+        document.querySelectorAll("#auth-screen .text-slate-400")
+            .forEach(item => item.textContent = "Browser prototype");
+
+        addBulkPrintButton();
+    };
+
+    function renderManagement() {
+        const current = school();
+        const students = appState.students.map(student => `
+            <option value="${student.id}">
+                ${escapeHTML(student.name)} - ${escapeHTML(student.sdms)}
+            </option>`).join("");
+
+        $("tab-school-management").innerHTML = `
+            <div>
+                <h2 class="text-2xl font-bold">School Management</h2>
+                <p class="text-sm text-slate-500">
+                    School identity, accounts, curriculum and announcements.
+                </p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+                <form id="v5-settings" class="bg-white p-6 rounded-2xl space-y-4">
+                    <h3 class="font-bold">School Identity and Reporting</h3>
+                    ${input("School Name", "name", "text", "required")}
+                    ${input("Address", "address")}
+                    ${input("Motto", "motto")}
+                    ${input("Academic Year", "academicYear", "text", "required")}
+                    ${input("Term", "term", "text", "required")}
+                    ${input("Currency Code", "currency", "text",
+                        'required pattern="[A-Z]{3}" maxlength="3"')}
+                    ${input("Replace School Badge", "badge", "file",
+                        'accept="image/png,image/jpeg"')}
+                    <p class="text-xs text-slate-500">
+                        Changing currency changes labels only; it does not convert balances.
+                    </p>
+                    <button class="${buttonClass}">Save School Details</button>
+                </form>
+
+                <form id="v5-account" class="bg-white p-6 rounded-2xl space-y-4">
+                    <h3 class="font-bold">Create an Account</h3>
+                    <label class="block text-xs font-semibold">
+                        Account Role
+                        <select name="role" class="${fieldClass} mt-1">
+                            ${[...roles, "Student"].map(role =>
+                                `<option>${role}</option>`).join("")}
+                        </select>
+                    </label>
+                    ${input("Staff Full Name", "name")}
+                    ${input("Staff Email", "email", "email")}
+                    <label class="block text-xs font-semibold">
+                        Student Profile - used for student accounts
+                        <select name="studentId" class="${fieldClass} mt-1">
+                            <option value="">Select registered student</option>
+                            ${students}
+                        </select>
+                    </label>
+                    ${input("Initial Password", "password", "password",
+                        'required minlength="8" autocomplete="new-password"')}
+                    <button class="${buttonClass}">Create Account</button>
+                    <p class="text-xs text-slate-500">
+                        Register student profiles in Student SIM & Profiles first.
+                        Give initial passwords to users privately.
+                    </p>
+                </form>
+            </div>
+
+            <form id="v5-professional" class="bg-white p-6 rounded-2xl space-y-4">
+                <h3 class="font-bold">ANP and TVET Subject / Module Setup</h3>
+                <p class="text-xs text-slate-500">
+                    Enter the approved subjects or trade modules used by your school,
+                    one per line. These are school configurations, not national certification.
+                    Existing marks are retained when modules change.
+                </p>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <label class="text-xs font-semibold">
+                        ANP - Associate Nursing Program
+                        <textarea name="ANP" rows="6"
+                            class="${fieldClass} mt-1"></textarea>
+                    </label>
+                    <label class="text-xs font-semibold">
+                        TVET - current trade modules
+                        <textarea name="TVET" rows="6"
+                            class="${fieldClass} mt-1"></textarea>
+                    </label>
+                </div>
+                <button class="${buttonClass}">Save Professional Modules</button>
+            </form>
+
+            <form id="v5-announcement" class="bg-white p-6 rounded-2xl space-y-4">
+                <h3 class="font-bold">Publish School Announcement</h3>
+                <textarea name="message" rows="3" required maxlength="2000"
+                    class="${fieldClass}" placeholder="School announcement"></textarea>
+                <button class="${buttonClass}">Publish Announcement</button>
+            </form>
+
+            <div class="bg-white p-6 rounded-2xl">
+                <h3 class="font-bold mb-4">School Accounts</h3>
+                <div id="v5-account-list" class="space-y-2"></div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl">
+                <h3 class="font-bold mb-3">School Backup</h3>
+                <button id="v5-backup" class="${buttonClass}">
+                    Download School JSON Backup
+                </button>
+                <p class="text-xs text-slate-500 mt-2">
+                    Contains personal records and password hashes.
+                    Store the backup privately and securely.
+                </p>
+            </div>`;
+
+        const settings = $("v5-settings");
+        ["name", "address", "motto", "academicYear", "term", "currency"]
+            .forEach(key => settings.elements[key].value = current[key] || "");
+
+        settings.onsubmit = async event => {
+            event.preventDefault();
+            if (!requireRole(["Headmaster"])) return;
+            try {
+                const data = new FormData(event.target);
+                const badge = await readBadge(data.get("badge"));
+                ["name", "address", "motto", "academicYear", "term", "currency"]
+                    .forEach(key => current[key] = data.get(key).trim());
+                if (badge) current.badge = badge;
+                logAudit("School Settings Updated", "School identity updated.");
+                saveState();
+                $("header-mode-badge").textContent = current.name;
+                showToast("School settings saved.");
+            } catch (error) {
+                showToast(error.message, "error");
+            }
+        };
+
+        $("v5-account").onsubmit = createAccount;
+
+        ["ANP", "TVET"].forEach(key => {
+            $("v5-professional").elements[key].value =
+                (current.professionalSubjects[key] || []).join("\n");
+        });
+
+        $("v5-professional").onsubmit = event => {
+            event.preventDefault();
+            if (!requireRole(["Headmaster"])) return;
+            ["ANP", "TVET"].forEach(key => {
+                current.professionalSubjects[key] = [...new Set(
+                    event.target.elements[key].value.split("\n")
+                        .map(value => value.trim()).filter(Boolean)
+                )];
+                appState.students
+                    .filter(student => student.combination === key)
+                    .forEach(student => {
+                        current.professionalSubjects[key].forEach(subject => {
+                            if (!(subject in student.grades)) {
+                                student.grades[subject] = "";
+                            }
+                        });
+                    });
+            });
+            logAudit("Professional Modules Updated", "ANP / TVET modules saved.");
+            saveState();
+            showToast("Professional modules saved.");
+        };
+
+        $("v5-announcement").onsubmit = event => {
+            event.preventDefault();
+            if (!requireRole(["Headmaster"])) return;
+            appState.announcements.unshift({
+                id: uid(),
+                message: event.target.elements.message.value.trim(),
+                date: nowStr(),
+                by: appState.currentUser.name
+            });
+            logAudit("Announcement Published", "School announcement added.");
+            saveState();
+            event.target.reset();
+            showToast("Announcement published.");
+        };
+
+        $("v5-backup").onclick = () => {
+            if (!requireRole(["Headmaster"])) return;
+            downloadBlob(
+                `${current.code}_school_backup.json`,
+                JSON.stringify(current, null, 2),
+                "application/json"
+            );
+        };
+
+        renderAccountList();
+    }
+
+    async function createAccount(event) {
+        event.preventDefault();
+        if (!requireRole(["Headmaster"]) || accountBusy) return;
+        accountBusy = true;
+
+        try {
+            const data = new FormData(event.target);
+            const role = data.get("role");
+            if (![...roles, "Student"].includes(role)) {
+                throw new Error("Invalid role.");
+            }
+
+            const user = {
+                id: uid(),
+                type: role === "Student" ? "student" : "staff",
+                role,
+                roleBadge: badges[role],
+                disabled: false
+            };
+
+            if (role === "Student") {
+                const student = appState.students.find(
+                    item => item.id === Number(data.get("studentId"))
+                );
+                if (!student) throw new Error("Select a registered student.");
+
+                if (database.schools.some(record =>
+                    record.state.users.some(account => account.sdms === student.sdms)
+                )) {
+                    throw new Error("An account with this SDMS already exists.");
+                }
+
+                Object.assign(user, {
+                    name: student.name,
+                    sdms: student.sdms,
+                    studentId: student.id
+                });
+            } else {
+                user.name = data.get("name").trim();
+                user.email = data.get("email").trim().toLowerCase();
+
+                if (!user.name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
+                    throw new Error("Enter the staff member's name and valid email.");
+                }
+
+                if (database.schools.some(record =>
+                    record.state.users.some(account => account.email === user.email)
+                )) {
+                    throw new Error("This email is already registered.");
+                }
+            }
+
+            Object.assign(user, await credentials(data.get("password")));
+            appState.users.push(user);
+            logAudit("Account Created", `${user.name}: ${user.role}`);
+            saveState();
+            event.target.reset();
+            renderAccountList();
+            showToast("Account created. The user can sign in with their own details.");
+        } catch (error) {
+            showToast(error.message || "Account creation failed.", "error");
+        } finally {
+            accountBusy = false;
+        }
+    }
+
+    function renderAccountList() {
+        const container = $("v5-account-list");
+        container.replaceChildren();
+
+        appState.users.forEach(user => {
+            const row = document.createElement("div");
+            row.className =
+                "flex flex-wrap items-center justify-between gap-3 p-3 bg-slate-50 rounded-xl";
+
+            const label = document.createElement("div");
+            label.className = "text-xs";
+            label.textContent =
+                `${user.name} | ${user.role} | ${user.email || user.sdms} | ` +
+                (user.disabled ? "Disabled" : "Enabled");
+
+            const button = document.createElement("button");
+            button.className = "px-3 py-2 rounded-lg bg-slate-200 text-xs";
+            button.textContent = user.disabled ? "Enable" : "Disable";
+            button.disabled = user.id === appState.currentUser.id;
+            button.onclick = () => {
+                if (!requireRole(["Headmaster"])) return;
+                user.disabled = !user.disabled;
+                logAudit(
+                    "Account Status Changed",
+                    `${user.name}: ${user.disabled ? "disabled" : "enabled"}`
+                );
+                saveState();
+                renderAccountList();
+            };
+
+            row.append(label, button);
+            container.append(row);
+        });
+    }
+
+    // Add a password-change action for every signed-in account.
+    const passwordButton = document.createElement("button");
+    passwordButton.className =
+        "px-3 py-2 bg-slate-100 rounded-xl text-xs font-semibold";
+    passwordButton.textContent = "Password";
+    passwordButton.onclick = () => {
+        if (!appState.currentUser) return;
+
+        let modal = $("v5-password-modal");
+        if (!modal) {
+            modal = document.createElement("div");
+            modal.id = "v5-password-modal";
+            modal.className =
+                "fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4";
+            modal.innerHTML = `
+                <form class="bg-white p-6 rounded-2xl max-w-md w-full space-y-4">
+                    <h3 class="text-lg font-bold">Change Password</h3>
+                    ${input("Current Password", "current", "password", "required")}
+                    ${input("New Password", "next", "password",
+                        'required minlength="8"')}
+                    <div class="flex gap-2">
+                        <button class="${buttonClass}">Save Password</button>
+                        <button type="button"
+                            class="px-4 py-2 bg-slate-100 rounded-xl">Cancel</button>
+                    </div>
+                </form>`;
+            document.body.append(modal);
+        }
+
+        modal.classList.remove("hidden");
+        const form = modal.querySelector("form");
+        form.reset();
+        form.querySelector('[type="button"]').onclick =
+            () => modal.classList.add("hidden");
+
+        form.onsubmit = async event => {
+            event.preventDefault();
+            const user = appState.currentUser;
+            if (!user || accountBusy) return;
+            accountBusy = true;
+            try {
+                if (await passwordHash(form.elements.current.value, user.salt)
+                    !== user.passwordHash) {
+                    throw new Error("Current password is incorrect.");
+                }
+                Object.assign(user, await credentials(form.elements.next.value));
+                logAudit("Password Changed", "Account password updated.");
+                saveState();
+                modal.classList.add("hidden");
+                showToast("Password updated.");
+            } catch (error) {
+                showToast(error.message, "error");
+            } finally {
+                accountBusy = false;
+            }
+        };
+    };
+    $("app-wrapper").querySelector("header").lastElementChild.prepend(passwordButton);
+
+    // Strengthen the prototype's action guards.
+    // These remain client-side checks, not a backend security boundary.
+    const guard = (fn, allowed) => function(...args) {
+        if (!requireRole(allowed)) {
+            args[0]?.preventDefault?.();
+            return;
+        }
+        return fn.apply(this, args);
+    };
+
+    handleCreateStudent = guard(function(event) {
+        const sdms = $("new-student-sdms").value.trim();
+        const iccid = $("new-student-iccid").value.trim();
+        const cls = $("new-student-class").value;
+        const combo = $("new-student-combo").value;
+
+        if (!/^\d{12}$/.test(sdms)) {
+            event.preventDefault();
+            return showToast("Enter a 12-digit SDMS number.", "error");
+        }
+        if (appState.students.some(student => student.iccid === iccid)) {
+            event.preventDefault();
+            return showToast("This ICCID is already assigned.", "error");
+        }
+        if (isALevel(cls) &&
+            !getSubjectsFor(cls, combo).length) {
+            event.preventDefault();
+            return showToast(
+                "Configure subjects or modules for this pathway first.",
+                "error"
+            );
+        }
+
+        original.createStudent(event);
+    }, ["Headmaster", "DOS"]);
+
+    handleDisciplineLog = guard(
+        handleDisciplineLog, ["Headmaster", "DOD"]
+    );
+    simulateCardInsert = guard(
+        simulateCardInsert, ["Headmaster", "DOS", "DOD", "Bursar"]
+    );
+    simulateCardEject = guard(
+        simulateCardEject, ["Headmaster", "DOS", "DOD", "Bursar"]
+    );
+    sendApduCommand = guard(
+        sendApduCommand, ["Headmaster", "DOS", "DOD", "Bursar"]
+    );
+
+    handleGradesEdit = function(event) {
+        event.preventDefault();
+        if (!requireRole(["Headmaster", "DOS", "Teacher"])) return;
+
+        const student = appState.students.find(
+            item => item.id === Number($("modal-grades").dataset.studentId)
+        );
+        if (!student) return;
+
+        const values = new FormData(event.target);
+        const changes = [];
+
+        for (const subject of getSubjectsFor(student.class, student.combination)) {
+            const raw = values.get(`grade_${subject}`);
+            const mark = raw === "" ? "" : Number(raw);
+
+            if (mark !== "" &&
+                (!Number.isFinite(mark) || mark < 0 || mark > 100)) {
+                return showToast("Marks must be from 0 to 100.", "error");
+            }
+            changes.push([subject, mark]);
+        }
+
+        changes.forEach(([subject, mark]) => student.grades[subject] = mark);
+        logAudit("Marks Updated", `Marks saved for ${student.name}.`);
+        saveState();
+        closeModal("modal-grades");
+        renderAcademicsTable();
+        showToast("Marks saved, including cleared marks.");
+    };
+
+    // Stop students from opening another student's report by direct function call.
+    const oldOpenReport = openReportCard;
+    openReportCard = function(id) {
+        const user = appState.currentUser;
+        if (!user) return;
+        if (user.role === "Student" && user.studentId !== Number(id)) {
+            return showModal(
+                "Access Denied", "You can only view your own report.", "error"
+            );
+        }
+        if (user.role !== "Student" &&
+            !["Headmaster", "DOS", "Teacher"].includes(user.role)) {
+            return showModal(
+                "Access Denied", "Academic access is required.", "error"
+            );
+        }
+        oldOpenReport(id);
+    };
+
+    // Dated attendance, with explicit records for every student on save.
+    renderAttendanceTable = function() {
+        appState.attendanceByDate ||= {};
+        appState.attendance =
+            appState.attendanceByDate[localDate()] || {};
+        original.attendance();
+        $("attendance-date").textContent = localDate();
+    };
+
+    toggleAttendance = function(studentId, present) {
+        if (!requireRole(["Headmaster", "DOS", "Teacher"])) return;
+        appState.attendance[studentId] = Boolean(present);
+    };
+
+    saveAttendance = function() {
+        if (!requireRole(["Headmaster", "DOS", "Teacher"])) return;
+        const date = localDate();
+
+        appState.students.forEach(student => {
+            appState.attendance[student.id] =
+                appState.attendance[student.id] !== false;
+        });
+        appState.attendanceByDate[date] = { ...appState.attendance };
+        logAudit("Attendance Saved", `Register saved for ${date}.`);
+        saveState();
+        showToast(`Attendance saved for ${date}.`);
+    };
+
+    // Separate wallet top-ups from school-fee payments.
+    const feeType = document.createElement("div");
+    feeType.className = "space-y-1";
+    feeType.innerHTML = `
+        <label class="block text-xs font-semibold">Transaction Type</label>
+        <select id="v5-fee-type" class="${fieldClass}">
+            <option value="Fee Deposit">School Fee Payment</option>
+            <option value="Wallet Top-up">SIM Wallet Top-up</option>
+        </select>`;
+    $("modal-fee").querySelector("form").prepend(feeType);
+    $("fee-amount").step = "0.01";
+    $("fee-amount").previousElementSibling.textContent = "Amount - school currency";
+
+    handleFeePayment = function(event) {
+        event.preventDefault();
+        if (!requireRole(["Headmaster", "Bursar"])) return;
+
+        const student = appState.students.find(
+            item => item.id === Number($("fee-student-select").value)
+        );
+        const amount = Number($("fee-amount").value);
+        if (!student || !Number.isFinite(amount) || amount <= 0) {
+            return showToast("Select a student and positive amount.", "error");
+        }
+
+        const type = $("v5-fee-type").value;
+        const rounded = Math.round(amount * 100) / 100;
+
+        if (type === "Wallet Top-up") {
+            student.balance =
+                Math.round((Number(student.balance) + rounded) * 100) / 100;
+        }
+
+        appState.finances.unshift({
+            txId: "TXN-" + uid(),
+            studentId: student.id,
+            student: student.name,
+            type,
+            amount: rounded,
+            method: $("fee-method").value,
+            bursar: appState.currentUser.name,
+            date: nowStr(),
+            recordedDate: localDate(),
+            term: school().term,
+            academicYear: school().academicYear
+        });
+
+        logAudit(type, `${student.name}: ${rounded} ${school().currency}`);
+        saveState();
+        closeModal("modal-fee");
+        renderFinancesTable();
+        showToast("Transaction recorded. No external payment was processed.");
+    };
+
+    const money = amount => {
+        try {
+            return new Intl.NumberFormat("en-RW", {
+                style: "currency",
+                currency: school().currency
+            }).format(Number(amount) || 0);
+        } catch {
+            return `${school().currency} ${Number(amount || 0).toFixed(2)}`;
+        }
+    };
+
+    renderFinancesTable = function() {
+        if (!requireRole(["Headmaster", "Bursar"])) return;
+
+        $("finance-table-body").innerHTML = appState.finances.map(item => `
+            <tr class="border-b border-slate-100">
+                <td class="p-4 text-xs">${escapeHTML(item.txId)}</td>
+                <td class="p-4 font-semibold">${escapeHTML(item.student)}</td>
+                <td class="p-4 text-xs">${escapeHTML(item.type)}</td>
+                <td class="p-4 font-bold">${escapeHTML(money(item.amount))}</td>
+                <td class="p-4 text-xs">${escapeHTML(item.method)}</td>
+                <td class="p-4 text-xs">${escapeHTML(item.bursar)}</td>
+                <td class="p-4 text-xs">${escapeHTML(item.date)}</td>
+            </tr>`).join("");
+
+        const fees = appState.finances.filter(item =>
+            item.type === "Fee Deposit" &&
+            item.term === school().term &&
+            item.academicYear === school().academicYear
+        ).reduce((sum, item) => sum + Number(item.amount), 0);
+
+        const topups = appState.finances.filter(item =>
+            item.type === "Wallet Top-up" &&
+            item.recordedDate === localDate()
+        ).reduce((sum, item) => sum + Number(item.amount), 0);
+
+        $("fin-total-collected").textContent = money(fees);
+        $("fin-wallet-topups").textContent = money(topups);
+        $("fin-total-outstanding").textContent = "Not configured";
+    };
+
+    // Avoid repeated unresolved requests from the same student.
+    const oldReportProblem = studentReportSimProblem;
+    studentReportSimProblem = function() {
+        if (!requireRole(["Student"])) return;
+        if (appState.swapRequests.some(request =>
+            request.studentId === appState.currentUser.studentId
+        )) {
+            return showToast("Your SIM replacement request is already pending.", "info");
+        }
+        oldReportProblem();
+    };
+
+    function announcementHTML() {
+        const items = appState.announcements.slice(0, 5);
+        if (!items.length) return "";
+        return `
+            <section class="bg-white border border-slate-200 rounded-2xl p-5">
+                <h3 class="font-bold mb-3">School Announcements</h3>
+                ${items.map(item => `
+                    <div class="py-3 border-t border-slate-100">
+                        <p class="text-sm whitespace-pre-wrap">${escapeHTML(item.message)}</p>
+                        <p class="text-xs text-slate-500 mt-1">
+                            ${escapeHTML(item.by)} | ${escapeHTML(item.date)}
+                        </p>
+                    </div>`).join("")}
+            </section>`;
+    }
+
+    renderDashboard = function() {
+        original.dashboard();
+        $("v5-dashboard-notices")?.remove();
+        const box = document.createElement("div");
+        box.id = "v5-dashboard-notices";
+        box.innerHTML = announcementHTML();
+        $("tab-dashboard").append(box);
+    };
+
+    renderStudentPortal = function() {
+        original.studentPortal();
+        const student = appState.students.find(
+            item => item.id === appState.currentUser.studentId
+        );
+        if (student) $("portal-balance").textContent = money(student.balance);
+
+        $("v5-student-notices")?.remove();
+        const box = document.createElement("div");
+        box.id = "v5-student-notices";
+        box.innerHTML = announcementHTML();
+        $("student-portal").prepend(box);
+    };
+
+    renderStudentsTable = function() {
+        original.students();
+        $("students-table-body").querySelectorAll("tr").forEach(row => {
+            const name = row.querySelector("td .font-bold")?.textContent;
+            const student = appState.students.find(item => item.name === name);
+            if (student && row.children[3]) {
+                row.children[3].textContent = money(student.balance);
+            }
+        });
+    };
+
+    // School identity and badge on every report card.
+    buildReportCard = function(student) {
+        const current = school();
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = original.report(student);
+
+        const heading = wrapper.querySelector(".bg-slate-900.text-white");
+        if (heading) {
+            heading.replaceChildren();
+
+            if (current.badge) {
+                const image = document.createElement("img");
+                image.src = current.badge;
+                image.alt = "School badge";
+                image.className = "w-20 h-20 object-contain mx-auto mb-3";
+                heading.append(image);
+            }
+
+            [current.name, current.address, current.motto,
+                `${current.academicYear} | ${current.term} | School Code: ${current.code}`
+            ].filter(Boolean).forEach((text, index) => {
+                const line = document.createElement("div");
+                line.className = index === 0
+                    ? "text-xl font-bold"
+                    : "text-xs mt-1";
+                line.textContent = text;
+                heading.append(line);
+            });
+        }
+
+        const footer = document.createElement("p");
+        footer.className = "text-xs text-slate-500 mt-3";
+        footer.textContent =
+            "School report. Grades and divisions use this portal's configured " +
+            "school rules and are not national examination certification.";
+        wrapper.append(footer);
+
+        return wrapper.innerHTML;
+    };
+
+    // Native browser printing, including report cards.
+    function printHTML(title, content) {
+        const popup = window.open("", "_blank");
+        if (!popup) {
+            return showToast("Allow pop-ups to print this report.", "error");
+        }
+
+        popup.document.open();
+        popup.document.write(`<!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <title>${escapeHTML(title)}</title>
+                <script src="[cdn.tailwindcss.com](https://cdn.tailwindcss.com)"><\/script>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 24px; color: #172033; }
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { padding: 9px; border-bottom: 1px solid #ddd; text-align: left; }
+                    img { max-width: 100%; }
+                    button, input, select, textarea { display: none !important; }
+                    .hidden { display: none !important; }
+                    .report-page { break-after: page; }
+                    .report-page:last-child { break-after: auto; }
+                    @page { size: A4; margin: 12mm; }
+                    @media print {
+                        body { padding: 0; }
+                        * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+                        .overflow-x-auto, .overflow-y-auto {
+                            overflow: visible !important;
+                            max-height: none !important;
+                        }
+                    }
+                </style>
+            </head>
+            <body>${content}</body>
+            </html>`);
+        popup.document.close();
+
+        popup.addEventListener("load", async () => {
+            await popup.document.fonts.ready;
+            await Promise.all(Array.from(popup.document.images).map(image =>
+                image.complete ? Promise.resolve() : new Promise(resolve => {
+                    image.onload = resolve;
+                    image.onerror = resolve;
+                })
+            ));
+            popup.focus();
+            popup.print();
+        }, { once: true });
+    }
+
+    printCurrentReportCard = function() {
+        const student = appState.students.find(
+            item => item.id === currentReportStudentId
+        );
+        if (!student || !appState.currentUser) return;
+        if (appState.currentUser.role === "Student" &&
+            student.id !== appState.currentUser.studentId) return;
+
+        printHTML(`${school().name} - ${student.name}`, buildReportCard(student));
+    };
+
+    function printVisibleModule() {
+        if (!appState.currentUser) return;
+
+        if (!$("modal-report").classList.contains("hidden")) {
+            return printCurrentReportCard();
+        }
+
+        const visible = appState.currentUser.role === "Student"
+            ? $("student-portal")
+            : Array.from(document.querySelectorAll(".tab-content"))
+                .find(item => !item.classList.contains("hidden"));
+
+        if (!visible) return;
+        if (visible.id === "tab-school-management") {
+            return showToast(
+                "Print academic, student, finance or attendance views instead.",
+                "info"
+            );
+        }
+
+        printHTML(
+            `${school().name} - School Records`,
+            `<h1 class="text-xl font-bold mb-4">${escapeHTML(school().name)}</h1>` +
+            visible.innerHTML
+        );
+    }
+
+    function addBulkPrintButton() {
+        if ($("v5-print-all")) return;
+        const button = document.createElement("button");
+        button.id = "v5-print-all";
+        button.className = buttonClass;
+        button.textContent = "Print All Report Cards";
+        button.onclick = () => {
+            if (!requireRole(["Headmaster", "DOS", "Teacher"])) return;
+            if (!appState.students.length) {
+                return showToast("No students are registered.", "info");
+            }
+            printHTML(
+                `${school().name} - Report Cards`,
+                appState.students.map(student =>
+                    `<section class="report-page">${buildReportCard(student)}</section>`
+                ).join("")
+            );
+        };
+        $("tab-academics").firstElementChild.append(button);
+    }
+
+    // Correct conduct denominator and protect CSV cells against formulas.
+    downloadCurrentReportCard = function() {
+        const student = appState.students.find(
+            item => item.id === currentReportStudentId
+        );
+        if (!student || !appState.currentUser) return;
+        if (appState.currentUser.role === "Student" &&
+            student.id !== appState.currentUser.studentId) return;
+
+        downloadCSV(
+            `report_${student.sdms}.csv`,
+            ["Field", "Value", "Grade"],
+            [
+                ["School", school().name],
+                ["Academic Year", school().academicYear],
+                ["Term", school().term],
+                ["Student", student.name],
+                ["SDMS", student.sdms],
+                ["Class", student.class],
+                ["Pathway", student.combination || "O-Level"],
+                ...getSubjectsFor(student.class, student.combination).map(subject => [
+                    subject,
+                    student.grades[subject] ?? "",
+                    gradeLetter(student.grades[subject])
+                ]),
+                ["Average", `${studentAverage(student)}%`],
+                ["Position", `${positionOf(student)}/${classSizeOf(student)}`],
+                ["School Division", getDivision(studentAverage(student))],
+                ["Conduct", `${student.conduct}/100`]
+            ]
+        );
+    };
+
+    downloadAllReportCards = function() {
+        if (!requireRole(["Headmaster", "DOS", "Teacher"])) return;
+        classRanking();
+        downloadCSV(
+            "all_report_cards_summary.csv",
+            ["Student", "SDMS", "Class", "Pathway", "Average",
+                "Position", "Class Size", "School Division", "Conduct"],
+            appState.students.map(student => [
+                student.name, student.sdms, student.class,
+                student.combination || "O-Level",
+                studentAverage(student), positionOf(student),
+                classSizeOf(student), getDivision(studentAverage(student)),
+                `${student.conduct}/100`
+            ])
+        );
+    };
+
+    function downloadBlob(filename, content, type) {
+        const url = URL.createObjectURL(new Blob([content], { type }));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }
+
+    downloadCSV = function(filename, headers, rows) {
+        const cell = value => {
+            let text = String(value ?? "");
+            if (/^[\s]*[=+\-@]/.test(text)) text = "'" + text;
+            return '"' + text.replace(/"/g, '""') + '"';
+        };
+        const csv = "\uFEFF" + [headers, ...rows]
+            .map(row => row.map(cell).join(",")).join("\r\n");
+        downloadBlob(filename, csv, "text/csv;charset=utf-8");
+    };
+
+    // APDU logs should display text, not interpret it as HTML.
+    appendApduLog = function(text) {
+        const line = document.createElement("div");
+        line.textContent = text;
+        $("apdu-log-box").append(line);
+        $("apdu-log-box").scrollTop = $("apdu-log-box").scrollHeight;
+    };
+
+    // Export permissions.
+    downloadAuditCSV = guard(downloadAuditCSV, ["Headmaster"]);
+    downloadFullHistory = guard(downloadFullHistory, ["Headmaster"]);
+    downloadFinanceCSV = guard(downloadFinanceCSV, ["Headmaster", "Bursar"]);
+    downloadDisciplineCSV = guard(
+        downloadDisciplineCSV, ["Headmaster", "DOD"]
+    );
+    downloadStudentRegistry = guard(
+        downloadStudentRegistry, roles
+    );
+
+    // Fresh-school startup: no seeded accounts and no old demo session.
+    window.onload = function() {
+        loadState();
+        buildAuthentication();
+
+        try {
+            const session = JSON.parse(sessionStorage.getItem(SESSION) || "null");
+            const record = database.schools.find(
+                item => item.id === session?.schoolId
+            );
+            const user = record?.state.users.find(
+                item => item.id === session?.userId && !item.disabled
+            );
+
+            if (record && user) {
+                bindSchool(record, user);
+                startAppSession();
+            } else {
+                sessionStorage.removeItem(SESSION);
+            }
+        } catch (error) {
+            sessionStorage.removeItem(SESSION);
+        }
+    };
+})();
+</script>
